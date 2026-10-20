@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+*.gpkg-shm
+*.gpkg-wal
+# Legacy local build output; versioned releases/ artifacts are tracked.
+/dist/
+.pytest_cache/
+.venv/
+.idea/
+.vscode/
+
+# Local agent, account and workspace state
+/.agents/
+/.codex/
+/.claude/
+/.openrig/
+/.aws/
+/AGENTS.md
+/CLAUDE.md
+/CLAUDE.local.md
+/.env
+/.env.*
+!/.env.example
+!/.env.sample
+/.secrets/
+/auth.json
+/credentials.json
+/config.local.*
+/logs/
+/scratch/
+*.gpkg-journal

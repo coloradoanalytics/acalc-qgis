@@ -1,0 +1,23 @@
+[general]
+name=Acalc
+qgisMinimumVersion=3.34
+qgisMaximumVersion=3.99
+description=Author outdoor acoustical models and calculate receiver sound levels through configurable calculation engines.
+about=Create acoustical models in a GeoPackage: sources, receivers, measurements, buildings, barriers, terrain, ground absorption, spectra and variants. Calculate ISO 9613-2:2024 receiver levels through a named HTTP calculation engine and save results with input provenance. Calculations require a running instance of Acalc Engine, local or remote; model editing works offline. Supported calculation effects depend on the selected engine's capabilities, and incompatible inputs are reported explicitly.
+version=0.8.3
+author=Colorado Analytics
+email=contact@coan.co
+homepage=https://github.com/coloradoanalytics/acalc-qgis
+repository=https://github.com/coloradoanalytics/acalc-qgis
+tracker=https://github.com/coloradoanalytics/acalc-qgis/issues
+tags=acoustics,noise,sound,environmental noise,iso 9613,noise mapping,geopackage
+category=Vector
+icon=icon.svg
+experimental=True
+deprecated=False
+hasProcessingProvider=False
+changelog=
+    0.8.3 Reorganized Project page and expanded log window; preserve calculation component counts after completion.
+    0.8.2 Remove the unencrypted connection warning for LAN use.
+    0.8.1 Simplified engine connections, draft tests and installed engine versions; QGIS 3.34 raster compatibility.
+    0.8.0 First public beta release.
