@@ -19,7 +19,7 @@ from acalc.api_settings_ui import ApiSettingsPage, EngineConnectionDialog
 from acalc.calculation_engines import available_engines
 from acalc.schema import ModelError
 from acalc.storage import ModelStore
-from tests.test_api_connections import FakeClient, capabilities
+from tests.test_api_connections import FakeClient, capabilities, room_capabilities
 from tests.test_model import APP
 class FakeCredentials:
     """Stand in for encrypted QGIS storage, separate from profile settings."""
@@ -313,6 +313,48 @@ class RemoteConnectionTests(unittest.TestCase):
         page._test()
         self.complete(client, [engine(version=None)], capabilities(implementation={"name": "engine-iso", "version": ""}))
         self.assertIn("version unknown", page.engines.item(0).text())
+        self.assertEqual(available_engines(self.store), ())
+
+    def test_default_room_profile_without_iso_fields_keeps_nondefault_iso_usable(self):
+        saved = self.remote()
+        page, client = self.page()
+        room = engine("room", default=True, version="0.2.0")
+        room["method"] = "engine-room geometric/1"
+        room_caps = room_capabilities()
+        for room_failure in (False, True):
+            with self.subTest(room_failure=room_failure):
+                page._test()
+                client.respond({"status": "ok", "key_required": True, "role": "calculation"})
+                client.respond({"engines": [room, engine("iso", default=False)]})
+                if room_failure:
+                    client.respond(error=ApiError("Room unavailable", status=503))
+                else:
+                    client.respond(room_caps)
+                client.respond(capabilities())
+                selected, = available_engines(self.store)
+                self.assertTrue(selected.id.endswith(":engine:iso"))
+                self.assertEqual(selected.capabilities_path, "/v1/engines/iso/capabilities")
+                self.assertEqual(selected.calculations_path, "/v1/engines/iso/calculations")
+                self.assertEqual(selected.connection["id"], saved["id"])
+                self.assertIn("1 of 2", page.status.text())
+                self.assertIn("unavailable" if room_failure else "unsupported", page.engines.item(0).text())
+                self.assertIn("engine-room geometric/1", page.engines.item(0).text())
+                if not room_failure:
+                    self.assertNotIn("atmospheric_absorption", room_caps)
+                    self.assertNotIn("implementation", room_caps)
+                    self.assertTrue(page.engines.item(0).toolTip())
+
+    def test_room_only_service_is_reachable_but_never_offered_to_iso_adapter(self):
+        self.remote()
+        page, client = self.page()
+        room = engine("room", version="0.2.0")
+        room["method"] = "engine-room geometric/1"
+        page._test()
+        client.respond({"status": "ok", "role": "calculation"})
+        client.respond({"engines": [room]})
+        client.respond(room_capabilities())
+        self.assertIn("Engine reachable. 0 of 1", page.status.text())
+        self.assertIn("unsupported", page.engines.item(0).text())
         self.assertEqual(available_engines(self.store), ())
 
     def test_legacy_service_falls_back_only_when_engine_list_missing(self):

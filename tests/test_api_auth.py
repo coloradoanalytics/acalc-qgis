@@ -77,6 +77,44 @@ class AuthenticatedClientTests(unittest.TestCase):
                 checker.cancel()
                 checker.deleteLater()
 
+    def test_local_no_key_discovery_accepts_generic_room_beside_iso(self):
+        from acalc.api_connection_check import ConnectionCheck
+        from acalc.api_connections import capabilities_problem
+        from tests.test_api_connections import room_capabilities
+        room_caps = room_capabilities()
+        with FakeCalculationAPI() as api, patch("acalc.api_connections.QgisCredentialStore.load") as load:
+            profiles = [{"name": name, "state": "ready", "default": name == "room",
+                         "engine": "engine-" + name, "version": "0.2.0" if name == "room" else "0.1.0",
+                         "method": "engine-room geometric/1" if name == "room" else api.capabilities["method"],
+                         "links": {"capabilities": f"/v1/engines/{name}/capabilities",
+                                   "calculations": f"/v1/engines/{name}/calculations"}}
+                        for name in ("room", "iso")]
+            def respond(method, path, body):
+                if path == "/v1/engines":
+                    return 200, {"engines": profiles}
+                if path == "/v1/engines/room/capabilities":
+                    return 200, room_caps
+                if path == "/v1/engines/iso/capabilities":
+                    return 200, api.capabilities
+            api.on_request = respond
+            checker = ConnectionCheck()
+            checked = []
+            checker.finished.connect(checked.append)
+            try:
+                checker.start({"mode": "local", "base_url": api.url})
+                wait_until(lambda: bool(checked))
+                self.assertEqual(checked[0]["error"], "")
+                self.assertEqual([row[1] for row in api.requests], ["/healthz", "/v1/engines",
+                    "/v1/engines/room/capabilities", "/v1/engines/iso/capabilities"])
+                self.assertTrue(all("Authorization" not in headers for headers in api.request_headers))
+                load.assert_not_called()
+                self.assertTrue(capabilities_problem(checked[0]["engines"][0]["capabilities"]))
+                self.assertEqual(capabilities_problem(checked[0]["engines"][1]["capabilities"]), "")
+                self.assertIsNone(checker.client._client_key)
+            finally:
+                checker.cancel()
+                checker.deleteLater()
+
     def test_auth_store_failure_happens_after_health_succeeds(self):
         with FakeCalculationAPI() as api, patch("acalc.api_connections.connection_client_key", side_effect=ModelError("Unlock the credential store.")) as load:
             client = ApiClient(connection=remote_connection(api))

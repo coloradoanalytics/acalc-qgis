@@ -35,6 +35,16 @@ def capabilities(**overrides):
     }
 
 
+def room_capabilities():
+    """Generic shape from engine-room/docs/PLUGIN.md draft 1, not an ISO adapter."""
+    return {"engine": "engine-room", "version": "0.2.0",
+            "request_schema": "acalc.room.request/1", "result_schema": "acalc.room.result/1",
+            "methods": [{"id": "geometric", "version": "1", "default": True,
+                         "bands_hz": [125, 250, 500, 1000, 2000, 4000]}],
+            "bands": {"kind": "octave", "nominal_hz": [125, 250, 500, 1000, 2000, 4000]},
+            "divisible": False}
+
+
 class FakeClient:
     def __init__(self):
         self.requests = []
