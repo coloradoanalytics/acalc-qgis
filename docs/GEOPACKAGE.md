@@ -1,5 +1,23 @@
 # Acalc model GeoPackage — schema 15
 
+The canonical project JSON hierarchy version is independent of native model
+schema 15. `acalc/portable_project.py` maps this complete native model to
+`project.models[]` as an entity with `payload.application = "acalc-qgis"`,
+`model_schema_version`, `crs`, `units`, `metadata` and `file_ids`. File records
+contain the actual native bytes, declared byte sizes, SHA-256 hashes and project
+ownership. Core owns the canonical hierarchy schema and codec.
+
+`payload.extensions["acalc-qgis"]` holds `native_model_id`,
+`geopackage_file_id`, `files` (file ID → safe working-relative path) and
+`elevation_rasters` (native raster ID → file ID and original stored path).
+The GeoPackage binds to `model.gpkg`; result files retain their native relative
+layout under `model_results/`; elevation dependencies live under
+`elevation/<raster-id>/`. Native project/model identity and containing shared
+project/entity identity are independent. Extraction binds raster paths at runtime
+without rewriting stored paths, CRS, units, object IDs or geometry. Portable
+opening skips native upgrades and history pruning to retain the original bytes.
+See [portable project workflow](USER_GUIDE.md#portable-projects).
+
 This is the model authoring contract. It describes the file written by the
 current Acalc plugin. Engines must not
 infer evaluation semantics from QGIS styling, visibility, feature order, or FIDs.

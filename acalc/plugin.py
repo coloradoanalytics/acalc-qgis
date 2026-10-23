@@ -181,9 +181,57 @@ class AcalcPlugin:
             self.project.setCrs(dialog.crs.crs())
 
     def choose_project(self):
-        path, _ = QFileDialog.getOpenFileName(self.dock, "Open Acalc project", QSettings().value("acalc/last_directory", ""), "Acalc GeoPackage (*.gpkg)")
+        path, _ = QFileDialog.getOpenFileName(self.dock, "Open Acalc project", QSettings().value("acalc/last_directory", ""), "Acalc projects (*.gpkg *.acalc-project.json);;Acalc GeoPackage (*.gpkg);;Portable project (*.acalc-project.json)")
         if path:
-            self.open_project(path)
+            if path.endswith(".acalc-project.json"):
+                self.import_portable_project(path)
+            else:
+                self.open_project(path)
+
+    def import_portable_project(self, path):
+        from .portable_project import import_model, models, read
+        available = models(read(path))
+        if not available:
+            raise ModelError("This portable project has no QGIS native model.")
+        selected = available[0]
+        if len(available) > 1:
+            labels = [f"{m.get('name', 'Model')} ({m['id']})" for m in available]
+            label, accepted = QInputDialog.getItem(self.dock, "Open portable project", "Model", labels, 0, False)
+            if not accepted:
+                return False
+            selected = available[labels.index(label)]
+        parent = QFileDialog.getExistingDirectory(self.dock, "Choose parent folder for extracted working model", str(Path(path).parent))
+        if not parent:
+            return False
+        name, accepted = QInputDialog.getText(self.dock, "Working model folder", "New folder name", text="acalc-model")
+        if not accepted:
+            return False
+        if not name or name in (".", "..") or Path(name).name != name or "\\" in name:
+            raise ModelError("Choose a single new folder name.")
+        if not self.prepare_close():
+            return False
+        store = import_model(path, Path(parent) / name, selected["id"])
+        return self.open_project(store.path, prepared=True)
+
+    def export_portable_project(self):
+        from .portable_project import export_model
+        store = self.require_store()
+        if any(layer.isModified() for layer in self.layers.values()):
+            raise ModelError("Save model layer edits before exporting a portable project.")
+        if self.dock.metadata_values() != self.metadata_snapshot or self.dock.calculation_page.dirty():
+            raise ModelError("Save project details and calculation parameters before exporting a portable project.")
+        path, _ = QFileDialog.getSaveFileName(self.dock, "Export portable project", str(Path(store.path).with_suffix(".acalc-project.json")), "Portable project (*.acalc-project.json)")
+        if not path:
+            return False
+        if not path.endswith(".acalc-project.json"):
+            path += ".acalc-project.json"
+        if Path(path).resolve() == Path(store.path):
+            raise ModelError("Choose a separate portable project filename.")
+        document = export_model(store, path)
+        self.message(f"Portable project saved with native model and file bytes: {path}")
+        if document["transfer"]["files"] == "external":
+            self.message("Other project files remain explicitly missing; this export is not fully self-contained.")
+        return True
 
     def open_project(self, path, prepared=False):
         # Removing legacy columns changes field indices. Never migrate beneath

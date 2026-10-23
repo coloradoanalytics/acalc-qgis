@@ -109,6 +109,8 @@ results and the engine's 2024 method.
   directivity authoring.
 - Variants (scenarios) built from model layers.
 - Import from QGIS vector layers and OpenStreetMap buildings.
+- Open and export canonical `.acalc-project.json` projects with native
+  GeoPackage and raster bytes, retaining other applications' project sections.
 - Calculations to ISO 9613-2:2024 through a configurable calculation API,
   with saved, provenance-tracked results, area-receiver contour surfaces, and
   measured-versus-calculated comparisons.

@@ -3,6 +3,33 @@
 This guide walks through model authoring, spectra, calculation and results in
 the Acalc QGIS plugin. See the [README](../README.md) for installation.
 
+## Portable projects
+
+Use **Project → Open…** to open either a native GeoPackage or a canonical
+`.acalc-project.json` file. A portable project can contain several models;
+choose the model, then a parent directory and a new working folder name.
+Extraction refuses existing folders and checks file sizes/hashes before opening
+the native model. The original project and model files remain available.
+
+Edit the extracted model normally. Save layer edits, project details and
+calculation parameters, then choose **Export portable project…** on the Project
+page. The export contains the GeoPackage and required elevation/result raster
+bytes. Other project sections, their file references, unknown fields and exact
+JSON numeric tokens are retained. It does not convert native Measurement layers
+into acquisition time series, recalculate results or create worksheet rows.
+
+Keep `model.gpkg`, `model.acalc-qgis.json`, `project.acalc-project.json`, and the
+extracted raster folders together when moving a working model. The companion
+files retain the full shared project and restore raster bindings when the native
+model is reopened. To share a single file, export the portable JSON again.
+
+Export uses Core's bounded 32 MiB project format. Oversized or missing required
+model files produce an error before replacing the output. Convert VRT rasters to
+self-contained raster files before export. Files explicitly marked missing in
+other project sections remain marked missing and the transfer is labelled
+external; such an export is not fully self-contained. No account credentials or
+QGIS engine connection keys are included.
+
 ## First model
 
 1. In **Project**, choose **New**, enter a name and `.gpkg` filename, and choose

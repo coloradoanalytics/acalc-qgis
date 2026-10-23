@@ -197,8 +197,10 @@ class ModelStore(DirectivityStore):
         return cls.open(path)
 
     @classmethod
-    def open(cls, path):
+    def open(cls, path, preserve_native=False):
         store = cls(path)
+        portable = Path(store.path).with_suffix(".acalc-qgis.json").is_file()
+        preserve_native = preserve_native or portable
         if not Path(store.path).is_file():
             raise ModelError("The project file does not exist.")
         try:
@@ -314,12 +316,18 @@ class ModelStore(DirectivityStore):
             if "no such table" in str(error):
                 raise ModelError("This GeoPackage is not an Acalc model. Create a new Acalc project first.") from error
             raise
+        if preserve_native and version != SCHEMA_VERSION:
+            raise ModelError("Portable native models require the current model schema; upgrade a separate native copy first.")
         if version < SCHEMA_VERSION:
             store._upgrade_model(version, horizontal_to_m, canonical_crs_wkt(srs))
-        store._ensure_measurement_input_triggers()
-        store._ensure_ground_mode()
-        store._ensure_reflection_coefficients()
-        store.discard_calculation_history()
+        if not preserve_native:
+            store._ensure_measurement_input_triggers()
+            store._ensure_ground_mode()
+            store._ensure_reflection_coefficients()
+            store.discard_calculation_history()
+        if portable:
+            from .portable_project import attach
+            attach(store)
         return store
 
     def _ensure_measurement_input_triggers(self):
@@ -694,8 +702,13 @@ class ModelStore(DirectivityStore):
 
     def elevation_rasters(self):
         with self.connection(readonly=True) as db:
-            return [dict(row) for row in db.execute(
+            rows = [dict(row) for row in db.execute(
                 "SELECT * FROM acalc_elevation_rasters ORDER BY name COLLATE NOCASE,raster_id")]
+        for row in rows:
+            binding = getattr(self, "portable_rasters", {}).get(row["raster_id"])
+            if binding and row["path"] == binding["stored_path"]:
+                row["path"] = binding["path"]
+        return rows
 
     def add_elevation_raster(self, path, name=None, band=1):
         from .raster_elevation import RasterElevation

@@ -172,6 +172,9 @@ class ModelDock(QDockWidget):
         button("Open…", self.guarded(self.controller.choose_project), actions)
         self.close_button = button("Close", self.guarded(self.controller.close_project), actions)
         layout.addLayout(actions)
+        self.export_project_button = QPushButton("Export portable project…")
+        self.export_project_button.clicked.connect(self.guarded(self.controller.export_portable_project))
+        layout.addWidget(self.export_project_button)
         self.import_button = QPushButton("Import layer…")
         self.import_button.clicked.connect(self.guarded(self.controller.import_layer))
         imports = QHBoxLayout()
@@ -471,7 +474,7 @@ class ModelDock(QDockWidget):
     def set_calculating(self, busy):
         self._calculation_busy = busy
         active = self.controller.store is not None
-        for widget in (self.project_form, self.extra_metadata, self.save_metadata_button, self.import_button, self.import_osm_button, self.feature_page,
+        for widget in (self.export_project_button, self.project_form, self.extra_metadata, self.save_metadata_button, self.import_button, self.import_osm_button, self.feature_page,
                        self.sources_page, self.receivers_page, self.objects_page, self.spectra_page,
                        self.directivity_page, self.terrain_page, self.variant_controls,
                        *self.variant_actions):
@@ -490,6 +493,7 @@ class ModelDock(QDockWidget):
             self.extra_metadata.setEnabled(active)
             self.save_metadata_button.setEnabled(active)
             self.close_button.setEnabled(active)
+            self.export_project_button.setEnabled(active)
             for widget in (self.validate_button, self.reload_button, self.restore_button, self.variant_controls):
                 widget.setEnabled(active)
             if active:
