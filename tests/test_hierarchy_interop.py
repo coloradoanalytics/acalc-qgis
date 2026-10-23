@@ -8,10 +8,11 @@ portable-project tests remain self-contained when Core is not checked out.
 import copy
 import os
 from pathlib import Path
+import tempfile
 import unittest
 
-from tests import test_portable_project as native_tests
-from acalc.portable_project import encode, export_model, import_model, models, read
+from tests.test_model import APP
+from acalc.portable_project import encode, export_model, file_bytes, import_model, models, read
 
 
 FIXTURE = Path(os.environ.get("ACALC_CORE_HIERARCHY_FIXTURE",
@@ -21,21 +22,20 @@ FIXTURE = Path(os.environ.get("ACALC_CORE_HIERARCHY_FIXTURE",
 class HierarchyInteropTests(unittest.TestCase):
     @unittest.skipUnless(FIXTURE.is_file(), "Core's generated hierarchy fixture is not present")
     def test_native_model_edit_preserves_heterogeneous_core_project(self):
-        fixture = native_tests.PortableProjectTests()
-        fixture.setUp()
-        self.addCleanup(fixture.doCleanups)
-        native = fixture.exported()
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
         document = read(FIXTURE)
-        for record in native["files"]:
-            record["owner"]["id"] = document["project"]["info"]["project_id"]
-        document["files"].extend(native["files"])
-        document["project"]["models"].extend(native["project"]["models"])
-        project = fixture.root / "heterogeneous.acalc-project.json"
-        project.write_bytes(encode(document))
-        model = native["project"]["models"][0]
-        imported = import_model(project, fixture.root / "heterogeneous-working", model["id"])
+        self.assertTrue(models(document), "Core fixture must include an actual native QGIS model")
+        model = models(document)[0]
+        native_id = model["payload"]["extensions"]["acalc-qgis"]["geopackage_file_id"]
+        native_record = next(f for f in document["files"] if f["id"] == native_id)
+        expected_native = file_bytes(native_record, FIXTURE.parent)
+        imported = import_model(FIXTURE, root / "heterogeneous-working", model["id"])
+        self.assertEqual(Path(imported.path).read_bytes(), expected_native)
+        self.assertTrue(imported.receiver_results(imported.variants()[0]["variant_id"]))
         imported.update_metadata("Edited native model", "QGIS", "Updated", "Unspecified", {})
-        output = fixture.root / "edited.acalc-project.json"
+        output = root / "edited.acalc-project.json"
         result = export_model(imported, output)
         before, after = copy.deepcopy(document), copy.deepcopy(result)
         # Only the selected model and its new immutable native byte record change.
@@ -44,7 +44,7 @@ class HierarchyInteropTests(unittest.TestCase):
         old_ids = {f["id"] for f in before["files"]}
         after["files"] = [f for f in after["files"] if f["id"] in old_ids]
         self.assertEqual(encode(before), encode(after))
-        self.assertEqual(models(result)[-1]["name"], "Edited native model")
+        self.assertEqual(next(m for m in models(result) if m["id"] == model["id"])["name"], "Edited native model")
         self.assertNotEqual(imported.metadata()["project_id"], result["project"]["info"]["project_id"])
         evidence = os.environ.get("ACALC_QGIS_INTEROP_OUTPUT")
         if evidence:
