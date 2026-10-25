@@ -29,3 +29,5 @@ __pycache__/
 /logs/
 /scratch/
 *.gpkg-journal
+
+.team/
