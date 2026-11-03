@@ -5,14 +5,14 @@ the Acalc QGIS plugin. See the [README](../README.md) for installation.
 
 ## Portable projects
 
-Use **Project → Open…** to open either a native GeoPackage or a canonical
+Use **Model → Open model…** to open either a native GeoPackage or a canonical
 `.acalc-project.json` file. A portable project can contain several models;
 choose the model, then a parent directory and a new working folder name.
 Extraction refuses existing folders and checks file sizes/hashes before opening
 the native model. The original project and model files remain available.
 
-Edit the extracted model normally. Save layer edits, project details and
-calculation parameters, then choose **Export portable project…** on the Project
+Edit the extracted model normally. Save layer edits, model details and
+calculation parameters, then choose **Export portable project…** on the Model
 page. The export contains the GeoPackage and required elevation/result raster
 bytes. Other project sections, their file references, unknown fields and exact
 JSON numeric tokens are retained. It does not convert native Measurement layers
@@ -32,12 +32,12 @@ QGIS engine connection keys are included.
 
 ## First model
 
-1. In **Project**, choose **New**, enter a name and `.gpkg` filename, and choose
+1. In **Model**, choose **New model…**, enter a name and `.gpkg` filename, and choose
    a local **projected** coordinate reference system suited to the site. Existing
-   files are never overwritten by project creation. **Coordinates and distance
+   files are never overwritten by model creation. **Coordinates and distance
    inputs use the CRS units.** Choose **meters or feet** separately for elevations
-   and object heights, and specify the vertical datum in project details.
-   Use **Project → Change CRS and units…** later to change these settings.
+   and object heights, and specify the vertical datum in model details.
+   Use **Model → Change CRS and units…** later to change these settings.
    Changing CRS reprojects every saved model layer, including archived layers,
    in one transaction; it does not transform the vertical datum. Existing results
    become out of date and retain their original map location.
@@ -51,7 +51,7 @@ QGIS engine connection keys are included.
    **Objects** has Buildings and Barriers tabs.
    The same layer menu contains **Rename layer** and **Delete layer**. Each view supports
    multiple independently named layers. All model layers appear in one
-   **Acalc · project name** group with type-specific symbols.
+   **Acalc · model name** group with type-specific symbols.
 3. Use **Add coordinates** for exact entry, or **Draw on map** to capture geometry
    using QGIS's snapping, coordinate transformation, and digitizing controls.
    Click once for a point; finish a line or polygon with a right-click.
@@ -95,7 +95,7 @@ labels (including turning labels off), and opacity persist through selection,
 data refreshes, recalculation, and reopening a saved QGIS project. Save the QGIS
 project to retain these presentation settings between sessions.
 Terrain rows include their object type. QGIS organizes layers into **Results**,
-**Sources**, **Receivers**, **Objects**, and **Terrain** under the Acalc project
+**Sources**, **Receivers**, **Objects**, and **Terrain** under the Acalc model
 group. Source Buildings go into Sources alongside point, line, and area sources.
 Buildings, barriers, ground absorption areas, and Trees go into Objects; terrain
 points, terrain lines, and imported elevation rasters go into Terrain. Generated
@@ -106,7 +106,7 @@ In the persistent window, **Sources** has Points, Lines, Areas, and Source Build
 
 For layers with editable ground elevations, use **☰ beside the layer selector →
 Set Z values…** to give every object a fixed ground Z or sample every vertex from
-an elevation raster. The fixed value uses the project's elevation units. All
+an elevation raster. The fixed value uses the model's elevation units. All
 objects are included, regardless of selection or the name filter. Explicit Z
 values set explicit ground elevations; object heights and building roof settings keep
 their meaning. The entire change is one undoable edit, and a failed raster sample
@@ -114,13 +114,13 @@ or invalid roof clearance leaves the layer unchanged. Use **Save layer edits**
 to save it. Area receiver boundaries, ground absorption areas, and Trees have no editable
 ground Z, so this command is omitted for those types.
 
-To copy external objects, load the vector layer into QGIS, then use **Project →
+To copy external objects, load the vector layer into QGIS, then use **Model →
 Import layer…** or **☰ beside the layer selector → Import layer…**. Choose the
 source, a compatible Acalc object type and a name for the new layer. You can
 copy all features or only the selection, including current unsaved source edits.
 Map fields for object names, notes, ground elevations and heights, or supply
 constant values. Ground absorption areas accept a G field/value; Trees accept a tree-height field/value; area receivers
-also have height and spacing; sources can share a compatible project spectrum.
+also have height and spacing; sources can share a compatible model spectrum.
 
 Import transforms X/Y into the model CRS. Select the units of source ground Z
 and height fields explicitly; elevations must use the model's vertical datum. Choose geometry Z explicitly to use it
@@ -138,7 +138,7 @@ The imported copy is saved immediately and opened in its Acalc view. Add it to
 the appropriate variants before calculation, and assign spectra to any sources
 that still need them. Subsequent source-layer changes do not update the copy.
 
-To download building outlines directly, use **Project → Import OSM buildings…**
+To download building outlines directly, use **Model → Import OSM buildings…**
 beside **Import layer…**. Choose the current map extent, draw a rectangle on the
 map, or enter a WGS84 extent in the dialog. The requested area must be no larger
 than **100 km²**. Choose a name for the new building layer and click **Download buildings**
@@ -179,12 +179,12 @@ and [ODbL 1.0 license](https://opendatacommons.org/licenses/odbl/1-0/).
 Add the new layer to the appropriate variants before calculating. It is a saved
 snapshot; later OSM changes do not update it.
 
-Project details have an explicit **Save project details** button. Opening or
-closing a model through Acalc prompts to save/discard pending project details, calculation parameters, and layer
-edits. Save project details before unloading the plugin, closing QGIS, or creating
+Model details have an explicit **Save model details** button. Opening or
+closing a model through Acalc prompts to save/discard pending model details, calculation parameters, and layer
+edits. Save model details before unloading the plugin, closing QGIS, or creating
 a different QGIS map: QGIS itself only prompts about its own layer edits.
 
-The Project page keeps an activity log. **View log…** opens a larger window;
+The Model page keeps an activity log. **View log…** opens a larger window;
 both views retain earlier messages and update as you work. Other metadata (JSON)
 is at the bottom of the page.
 
@@ -197,7 +197,7 @@ selection or data. QGIS's **Identify** feature action menus also offer **Acalc
 properties**. Digitizing tools retain their normal right-click-to-finish behavior.
 
 The dialog's **Coordinates** tab edits ground Z and per-vertex height;
-point, line, and area sources also have a **Spectrum** tab for selecting and previewing a project
+point, line, and area sources also have a **Spectrum** tab for selecting and previewing a model
 sound power spectrum.
 Buildings are passive objects with no attached sources. Source Buildings represent
 a source in the UI and can contain many point and area component sources. Both
@@ -215,7 +215,7 @@ sampling a raster can supply it.
 Regular Buildings have no selectable faces.
 In **Source Building** properties, click a wall or roof face to highlight it, then
 choose **Sources**. Add one or
-more rectangular area sources or point sources and assign a project sound power
+more rectangular area sources or point sources and assign a model sound power
 spectrum. Point sources use total sound power and have a **Distance from surface**
 setting, measured perpendicular outward from the wall or roof. Area sources use
 total or per-square-meter power and have width/height. Both use X/Y offsets from
@@ -263,7 +263,7 @@ between 0 (hard ground) and 1 (porous ground). Draw their perimeter on the map o
 enter X/Y coordinates; no Z or height is required. They support the normal edit,
 duplicate, undo, and save workflows. Areas included in a variant override the
 default ground factor inside their polygons; uncovered ground uses the default.
-Project validation reports overlapping areas by name and layer. Calculation blocks
+Model validation reports overlapping areas by name and layer. Calculation blocks
 if areas included in a selected variant overlap; shared edges and vertices are allowed.
 
 **Trees** marks dense woodland with a drawable 2D polygon. Choose **Terrain → Trees** from
@@ -314,14 +314,14 @@ capture. Each accepted feature is one undoable addition; undo/redo never opens a
 properties dialog. Acalc's Draw workflow does not change layer form-suppression
 settings or QGIS's global attribute-form preferences.
 
-## Project spectra
+## Model spectra
 
-Open **☰ → Spectra** for the project's **Sound power** and **Absorption** catalogs.
+Open **☰ → Spectra** for the model's **Sound power** and **Absorption** catalogs.
 Each tab lists its spectra and shows whether bands are complete or still unknown.
 Use **New**, **Edit** (or double-click), **Duplicate**, and **Delete** to manage
 records. The editor includes a name, reference/notes, and eight octave bands from
 63 Hz to 8 kHz. **Save spectrum** writes immediately to the GeoPackage; **Cancel**
-leaves it unchanged. New projects start with two empty catalogs.
+leaves it unchanged. New models start with two empty catalogs.
 
 Sound power is entered as unweighted levels in **dB** only. Choose **total sound
 power**, **sound power per meter**, or **sound power per square meter** in the
@@ -363,11 +363,11 @@ appropriate octave value. Individual face/side assignments remain future work.
 sources, and invalid or incomplete absorption spectra assigned to reflecting
 objects. Drafts can still be saved and exported as variant definitions;
 an exported definition does not imply readiness for calculation. Exports include
-both project catalogs, along with the relative GeoPackage reference.
+both model catalogs, along with the relative GeoPackage reference.
 
 ### Directionality authoring
 
-Choose **Acalc menu → Directivity** to manage the project's local library.
+Choose **Acalc menu → Directivity** to manage the model's local library.
 Each definition has a name, notes, principal direction, level reference, and an
 editable table of individual azimuth/elevation directions against frequencies.
 Add/remove directions and frequencies, paste rectangular spreadsheet cells, and
@@ -385,12 +385,12 @@ draft with unknown values; numerical Annex B generation is not implemented.
 **Import table** accepts native definition JSON and CSV/TSV. Text tables start
 with `azimuth_deg,elevation_deg,63,125,...` (numeric frequency headings in Hz).
 **Attach CLF** retains original CF1/CF2 bytes and a SHA-256 checksum inside the
-project, up to 10 MiB. It explicitly does not decode those binaries or infer any
+model, up to 10 MiB. It explicitly does not decode those binaries or infer any
 directional values. **Export definition** writes portable versioned JSON.
 
 In **point-source properties → Directionality**, select a saved definition,
 aim its principal Up/Down/North/South/East/West, then apply incremental rotations
-about the fixed project Z, east–west or north–south axes. North means grid north
+about the fixed model Z, east–west or north–south axes. North means grid north
 (+Y), not geodetic true north. Rotation order matters; the full rotation matrix
 preserves roll. Orbiting the preview changes only the camera. Source assignments
 and orientation participate in Apply/Cancel, layer undo/redo and Save layer edits.
@@ -402,7 +402,7 @@ This release integrates directionality **authoring**, not directional propagatio
 The plugin and Rust engine reject calculations with assigned directional point
 sources, preserving prior results. Unassigned definitions do not affect calculations.
 
-The model uses schema 15. Opening a schema 1–14 project first writes a separate
+The model uses schema 15. Opening a schema 1–14 model first writes a separate
 `*.schema-N-backup-*.gpkg` beside it, then upgrades it transactionally.
 Geometry, IDs, layer membership, and the latest results per variant are preserved.
 Schema 14 separates Buildings from Source Buildings. Existing building layers with
@@ -481,7 +481,7 @@ For a forward calculation of receiver levels:
    engine…** asks for confirmation. For a remote instance, choose **Remote**,
    enter a name, URL and client key, then **Save**. The key is stored only in
    QGIS’s encrypted authentication database; connections belong to the QGIS
-   profile, never the project. **Test connection** works both here and in the
+   profile, never the model. **Test connection** works both here and in the
    editor: it checks reachability, health, access and each installed engine’s
    capabilities. The list shows one row per method/engine and its installed
    version; unavailable, unsupported and unknown versions are identified.
@@ -493,7 +493,7 @@ For a forward calculation of receiver levels:
    HTTP on the LAN and HTTPS for public services.
 2. Include saved source and receiver layers in a variant and assign complete
    sound-power spectra. The plugin converts the complete selected model to
-   metric JSON: project X/Y units, ground Z plus acoustic height M, material
+   metric JSON: model X/Y units, ground Z plus acoustic height M, material
    assignments and the model's zero-as-silence spectrum convention are preserved.
    Unsupported effects stop conversion with an incompatibility message.
 3. Open **☰ → Calculation**, then **Calculate**. Choose **Engine** in
@@ -505,7 +505,7 @@ For a forward calculation of receiver levels:
    based on dBA or dBC: as the calculation progresses, paths not expected to
    raise that overall level at any receiver are abandoned. Thresholds are set
    automatically; overall levels stay very close to an unpruned calculation, but
-   individual octave bands may lose accuracy. Projects that had the former
+   individual octave bands may lose accuracy. Models that had the former
    numeric cutoff switched on open with dBA pruning.
    Connection Settings contain only connection/discovery information.
    On the Calculation page, drag the divider below the variant tree to give
@@ -551,7 +551,7 @@ For a forward calculation of receiver levels:
    The calculation engine delivers each area as a GeoTIFF, downloaded separately
    after the run's results so large grids do not slow the result transfer. Acalc
    saves it beside the model in `<model name>_results/<run ID>/` with the model's
-   CRS and adds it to the project; keep that folder with the `.gpkg` when moving a
+   CRS and adds it to the QGIS project; keep that folder with the `.gpkg` when moving a
    model. Individual source contributions are retained only for point receivers.
    Raster cells are centred on the calculation grid. Excluded/missing samples and
    zero-energy samples are transparent and are not reported on hover. (Runs saved
@@ -609,7 +609,7 @@ debugging on a specific run. Result size and memory use grow with the number of
 integrations (roughly 1 KB per integration; large models can produce many gigabytes).
 
 1. Open your model in the **Acalc** panel, open the **☰** menu, and select
-   **Project**. Under **Project details**, find **Other metadata (JSON)**.
+   **Model**. Find **Other metadata (JSON)** at the bottom of the page.
 2. Manually add `"keep_integration_reports": true` inside the existing JSON object.
    If the field is empty or contains only `{}`, enter this complete object:
 
@@ -622,12 +622,12 @@ integrations (roughly 1 KB per integration; large models can produce many gigaby
    Keep any existing metadata entries and separate entries with commas. Use the
    JSON boolean `true` without quotes around it; the string `"true"` does not enable
    reports. The plugin never inserts, defaults, or pre-fills this optional key.
-3. Click **Save project details**, then start the intended calculation. The selected
+3. Click **Save model details**, then start the intended calculation. The selected
    engine must advertise `integration_reports` in its capabilities, or the plugin
    refuses the run with an explanation.
 
 The flag remains enabled for subsequent runs until you remove the key or change
-its value to `false` and click **Save project details** again. Do this after the
+its value to `false` and click **Save model details** again. Do this after the
 intended run to return to summary-only reports; absent or `false` leaves the engine's
 summary default in place. The exact submitted request saved with each completed
 run records when full reports were requested.
@@ -650,7 +650,7 @@ run records when full reports were requested.
 
 Area receivers have one polygon perimeter, a height above ground (default
 **1.5 m**) and point spacing (default **10 m**). Their regular grid is aligned
-with the project X/Y axes and starts at the polygon bounding box's minimum X/Y.
+with the model X/Y axes and starts at the polygon bounding box's minimum X/Y.
 Points on the area perimeter are included; points outside it are omitted.
 Each point samples the final ground surface and adds the polygon's shared height.
 Spacing inputs follow the CRS units; heights follow the separate elevation unit setting. Both remain stored in meters.
@@ -692,7 +692,7 @@ Choose **Generate terrain from raster…**, select a raster file or a loaded QGI
 raster, then **Draw box on map** to
 mark the area to import. The area menu also accepts coordinates or the current
 map extent. Enter a new terrain-layer name and **Maximum elevation deviation**
-(default 0.5 m, displayed in the project's elevation units), then choose
+(default 0.5 m, displayed in the model's elevation units), then choose
 **Generate terrain**. Generation runs in the background and can be cancelled.
 
 The importer starts with the box corners, triangulates in XY, and inserts the
@@ -715,7 +715,7 @@ counts, achieved deviation, and import details. **Zoom to mesh** shows it on the
 Meshes never appear in the Lines editor. Opening one from QGIS or a variant returns
 to Generated terrain. Their stored triangle edges preserve the checked surface
 for calculation. Add the layer under **Generated terrain** in **Variants** to use it.
-Deletion excludes the layer from all variants; use **Project → Restore layer** to
+Deletion excludes the layer from all variants; use **Model → Restore layer** to
 recover it. Each generation starts a new import, even when using the same raster.
 Select the appropriate layers in each variant. The raster is only an input to
 generation: it is not registered with the model or added to QGIS, and cancellation
@@ -744,7 +744,7 @@ objects to use changed elevations. See the
 [surface contract](GEOPACKAGE.md#explicit-ground-and-terrain-construction).
 
 **Remove layer** removes it from the active model and every variant.
-Its saved feature table stays in the GeoPackage. **Project → Restore layer**
+Its saved feature table stays in the GeoPackage. **Model → Restore layer**
 recovers it; variant membership must then be chosen again. Removing a layer
 using QGIS's layer tree only unloads it from the map. Acalc's **Reload layers**, or
 selecting that layer in the dock, reloads it. Renaming through QGIS also updates

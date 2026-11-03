@@ -368,7 +368,7 @@ class FaceSourcesDialog(QDialog):
         self.spectrum_status.setText(
             ('Total source sound power' if record['spectrum']['power_basis'] == 'total' else 'Sound power per square meter')
             + ' · dB · 0 = no energy' if record else
-            'Assign a project sound power spectrum before calculation. Manage spectra in the project’s Spectra view.')
+            'Assign a model sound power spectrum before calculation. Manage spectra in the model’s Spectra view.')
         self.refresh_preview()
 
     def validate(self):

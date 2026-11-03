@@ -59,7 +59,7 @@ def snapshot_variant(store, variant_id):
         project = dict(db.execute("SELECT * FROM acalc_project").fetchone())
         project_srs = osr.SpatialReference()
         if project_srs.ImportFromWkt(project["crs_wkt"]) != 0:
-            raise ModelError("Invalid project coordinate system.")
+            raise ModelError("Invalid model coordinate system.")
         for identity in definition["layer_ids"]:
             layer = layers[identity]
             table = layer["table_name"]
@@ -69,7 +69,7 @@ def snapshot_variant(store, variant_id):
                              "JOIN gpkg_spatial_ref_sys s ON g.srs_id=s.srs_id WHERE g.table_name=?", (table,)).fetchone()
             layer_srs = osr.SpatialReference()
             if crs is None or layer_srs.ImportFromWkt(crs[1]) != 0 or not project_srs.IsSame(layer_srs):
-                raise ModelError(f"{layer['name']}: layer CRS differs from the project.")
+                raise ModelError(f"{layer['name']}: layer CRS differs from the model.")
             rows = [dict(row) for row in db.execute(f'SELECT * FROM "{table}" ORDER BY object_id,fid')]
             kind = LAYER_TYPES.get(layer["feature_type"])
             if kind is None:
@@ -343,13 +343,13 @@ def export_variant(store, variant_id, destination, format_id):
         (folder / "export_report.json").write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
         (folder / "IMPORT.txt").write_text(
             ("In CadnaA 2021 use File > Import > QSI and select model.qsi. Keep all companion files together.\n"
-             "Coordinates and all elevations are metres. XY is the project's projected XY multiplied by horizontal_to_m.\n"
+             "Coordinates and all elevations are metres. XY is the model's projected XY multiplied by horizontal_to_m.\n"
              "Set the coordinate system manually; a feet-based CRS needs a suitable metre-based frame before overlaying other data.\n"
              "Rebuild/check the DTM and check roof/barrier heights, reflection losses and spectra after import.\n"
              if format_id == "qsi" else
              "Authored GIS geometries only: ground Z and height M retain Acalc's storage meaning.\n"
              "These files are not a calculation-ready CadnaA model. Use QSI for acoustic transfer.\n"
-             "Layer order and full attributes/spectra are in model_snapshot.json. XY retains the project CRS units.\n")
+             "Layer order and full attributes/spectra are in model_snapshot.json. XY retains the model CRS units.\n")
             + "Match weather, default ground factor, meteorology, reflection order and numerical settings manually using export_report.json.\n"
             "Different triangulation and ISO editions may produce different results. No acoustic validation or conformity is asserted.\n"
             "Import into CadnaA 2021 has not yet been verified.\n", encoding="utf-8")

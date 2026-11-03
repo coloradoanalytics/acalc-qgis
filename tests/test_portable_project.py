@@ -275,6 +275,6 @@ class PortableProjectTests(unittest.TestCase):
         self.assertEqual(plugin.store.portable_context["model_id"], second["id"])
         plugin.dock.project_name.setText("Unsaved")
         with patch("acalc.plugin.QFileDialog.getSaveFileName") as dialog:
-            with self.assertRaisesRegex(ModelError, "Save project details"):
+            with self.assertRaisesRegex(ModelError, "Save model details"):
                 plugin.export_portable_project()
             dialog.assert_not_called()

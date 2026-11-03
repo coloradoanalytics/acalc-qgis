@@ -12,7 +12,7 @@ ownership. Core owns the canonical hierarchy schema and codec.
 `elevation_rasters` (native raster ID → file ID and original stored path).
 The GeoPackage binds to `model.gpkg`; result files retain their native relative
 layout under `model_results/`; elevation dependencies live under
-`elevation/<raster-id>/`. Native project/model identity and containing shared
+`elevation/<raster-id>/`. Native model identity and containing shared
 project/entity identity are independent. Extraction binds raster paths at runtime
 without rewriting stored paths, CRS, units, object IDs or geometry. Portable
 opening skips native upgrades and history pruning to retain the original bytes.
@@ -40,7 +40,7 @@ infer evaluation semantics from QGIS styling, visibility, feature order, or FIDs
   registry, then exports that canonical definition; this preserves nested
   identifiers that a WKT2 input may omit. Custom definitions are exported directly.
   Creation and migration
-  normalize the project WKT without changing its CRS meaning. The engine requires
+  normalize the model WKT without changing its CRS meaning. The engine requires
   these definitions to match, allowing whitespace differences outside quoted
   strings; a differently serialized or inconsistent external definition must be
   corrected before calculation. An authority code alone is not proof of a match.
@@ -63,7 +63,7 @@ infer evaluation semantics from QGIS styling, visibility, feature order, or FIDs
 
 ## Identity and time
 
-Project, layer, spectrum and variant identities are UUID strings, generated as UUIDv7
+Model, layer, spectrum and variant identities are UUID strings, generated as UUIDv7
 by this plugin. Feature `object_id` is also a UUID: coordinate entry generates
 UUIDv7; QGIS's normal `uuid()` field default can generate UUIDv4. Readers accept
 valid UUIDs, including QGIS's brace-wrapped text representation, and compare their
@@ -72,7 +72,7 @@ normalized values. Feature identity must be unique within its layer. Together,
 
 GeoPackage integer `fid` values are local storage keys, not portable object
 identifiers. Timestamp fields are UTC ISO 8601 text with millisecond precision.
-Project modification timestamps are updated for plugin changes. SQLite triggers
+Model modification timestamps are updated for plugin changes. SQLite triggers
 also track feature, layer, spectrum and variant changes made by external
 writers. Timestamps advance by at least one millisecond for each change, including
 multiple changes in one clock tick, so rapid edits cannot leave results marked
@@ -84,6 +84,10 @@ These are registered as `attributes` in `gpkg_contents` so that standard tools c
 discover them. They are not loaded into the model's QGIS layer group.
 
 ### `acalc_project`
+
+The native model keeps the historical table name `acalc_project` and identity
+column `project_id` for file compatibility. They describe the model, independently
+of the containing QGIS project or portable project container.
 
 | Column | Type / meaning |
 | --- | --- |
@@ -102,11 +106,11 @@ discover them. They are not loaded into the model's QGIS layer group.
 | `created_at`, `modified_at` | TEXT NOT NULL, UTC timestamps |
 | `metadata_json` | TEXT NOT NULL, arbitrary JSON object; default `{}` |
 
-The project metadata may contain the manually entered optional boolean
+The model metadata may contain the manually entered optional boolean
 `keep_integration_reports`. To enable it, follow the plugin's
 [full integration report instructions](USER_GUIDE.md#full-integration-reports-optional)
-for **Project → Project details → Other metadata (JSON)** and click
-**Save project details** before running. Only JSON `true` requests full extended-source
+for **Model → Other metadata (JSON)** and click
+**Save model details** before running. Only JSON `true` requests full extended-source
 integration reports; absent, `false`, or any other value leaves the request field
 omitted. The plugin never inserts, defaults, or pre-fills this key. It is intended
 for compliance evidence or debugging on a specific run: result size and memory
@@ -162,7 +166,7 @@ Feature tables have a normal GeoPackage spatial index.
 | `definition_json` | TEXT NOT NULL, variant definition below |
 | `created_at`, `modified_at` | TEXT NOT NULL, UTC timestamps |
 
-There is always at least one variant. A new project contains `Default` with
+There is always at least one variant. A new model contains `Default` with
 no layers. Each variant is evaluated independently; it includes exactly its
 listed active layers. Layer IDs cannot repeat or refer to missing/archived layers.
 Newly created layers are not implicitly added to variants.
@@ -302,7 +306,7 @@ The UI displays absorption α while storing energy reflection coefficient 1−α
 The pruning and integration fields map directly to the [API settings](API.md#settings).
 Explicit null disables a pruning control; an absolute cutoff of numeric zero
 means 0 dB. The retired `receiver_margin_db` and its editor memory are discarded
-when loading old projects and removed on their next save. Unknown solver bounds
+when loading old models and removed on their next save. Unknown solver bounds
 retain work. Integration
 limits never authorize truncating unresolved work. These values live in the
 model, not in a named API connection, so switching engines preserves parameters.
@@ -311,7 +315,7 @@ their values in `pruning_values` while the corresponding solver field is null.
 This editor-only dictionary is never sent to the APIs. When no saved value exists,
 the editor offers a 0 dB absolute cutoff. This is an application preset, not an
 ISO-prescribed tolerance. An enabled value takes precedence over editor memory.
-Parameter changes advance the project revision and make saved results stale.
+Parameter changes advance the model revision and make saved results stale.
 Completed runs retain the submitted settings, exact API request and result.
 
 The implemented propagation scope is point, line and area sources over a
@@ -369,7 +373,7 @@ and `spectrum_json` TEXT. Existing SQL columns remain nullable for compatibility
 with the original container, but schema 2 and 3 readers/writers require a canonical
 UUID spectrum ID, a nonblank name, and a valid typed JSON definition for every
 record. Names are case-insensitively unique within each kind. Names may repeat
-across the sound power and absorption catalogs. New projects have empty catalogs.
+across the sound power and absorption catalogs. New models have empty catalogs.
 
 Both kinds use eight octave bands, in order: **63, 125, 250, 500, 1000, 2000,
 4000, 8000 Hz**. The nested spectrum definition has its own version, currently 2:
@@ -440,11 +444,11 @@ objects and removed layers; the UI also guards edit sessions and undo history.
 
 ### `acalc_directivities`
 
-Schema 9 adds a project-local directionality catalog. Columns are `directivity_id`
+Schema 9 adds a model-local directionality catalog. Columns are `directivity_id`
 (canonical UUID TEXT primary key), `name` (nonblank, case-insensitively unique TEXT),
 `definition_json` (TEXT), and `revision` (positive INTEGER incremented on save).
 The editor compares its loaded revision on save to prevent overwriting a concurrent
-edit. Catalog writes advance project freshness through SQLite triggers.
+edit. Catalog writes advance model freshness through SQLite triggers.
 
 The version-1 definition contains:
 
@@ -472,7 +476,7 @@ The version-1 definition contains:
 
 Point-source tables add nullable TEXT `directivity_id` and
 `directivity_orientation`. Null/empty assignment is omnidirectional. An assigned
-ID refers to this project's catalog. Orientation is JSON containing a proper
+ID refers to this model's catalog. Orientation is JSON containing a proper
 orthonormal 3×3 local-to-world matrix; null means identity. World +X/+Y/+Z are
 grid east/north/up. Incremental world-axis rotations multiply on the left;
 principal shortcuts use a deterministic shortest rotation, resetting roll.
@@ -521,7 +525,7 @@ Close legacy layer edit sessions before migration because removing columns
 changes field indices. Existing non-editing QGIS layers refresh their fields.
 
 Schema 11 added nullable TEXT `face_sources` to building tables. Earlier upgrades
-also apply when opening older projects.
+also apply when opening older models.
 
 The schema-7 upgrade adds nullable `absorption_spectrum_id` columns to building
 and barrier tables and updates variant definition versions. Existing geometry,
@@ -587,7 +591,7 @@ The group refresh CLI options have been removed.
 | `notes` | Nullable TEXT, free text |
 | `enabled` | Legacy compatibility column, default 1. Ignored by current engines and hidden in QGIS forms/tables. |
 | `ground_mode` | Ground-point types only: authoring TEXT `per_point` (default) or `uniform`. Migration-only `unresolved` blocks use until explicit Z is supplied. |
-| `absorption_spectrum_id` | Building/barrier only, required schema-8 column: nullable TEXT referencing a project absorption spectrum; null/empty uses the scalar fallback |
+| `absorption_spectrum_id` | Building/barrier only, required schema-8 column: nullable TEXT referencing a model absorption spectrum; null/empty uses the scalar fallback |
 | `directivity_id` | Point-source only, required schema-9 nullable TEXT catalog reference; null/empty is omnidirectional |
 | `directivity_orientation` | Point-source only, required schema-9 nullable TEXT JSON local-to-world rotation matrix; null is identity |
 | `reflection_coefficient` | Building/barrier only: optional nullable REAL reflected energy fraction 0–1; NULL or an absent legacy column inherits the corresponding calculation default |
@@ -600,7 +604,7 @@ The group refresh CLI options have been removed.
 | `broadband_a_db` | Measurement only: nullable finite REAL A-weighted sound-pressure level in dBA; entered manually when no octaves are supplied, otherwise derived from entered octaves |
 | `broadband_z_db` | Measurement only: legacy nullable REAL retained for file compatibility; no longer calculated or displayed |
 | `level_63_db` … `level_8000_db` | Measurement only: eight nullable finite REAL unweighted octave sound-pressure levels in dB re 20 µPa |
-| `spectrum_id` | Nullable TEXT, only on point/line/area source tables; exact ID of a project `sound_power` spectrum; null/empty means unassigned |
+| `spectrum_id` | Nullable TEXT, only on point/line/area source tables; exact ID of a model `sound_power` spectrum; null/empty means unassigned |
 
 Measurement NULL means unknown, while numeric zero is a real 0 dB observation.
 dBA is the energetic sum over the entered octave levels after applying the
@@ -645,7 +649,7 @@ for the stored 0.9 defaults. An unchanged control preserves the exact original
 stored coefficient. The Properties checkbox **Use calculation default** stores
 NULL; clearing it stores 1 − the displayed α. The raw ρ field is hidden in QGIS
 forms and attribute tables. Changes use the normal Apply/Cancel, undo/redo and
-layer-save workflow. The displayed default comes from the project's calculation settings.
+layer-save workflow. The displayed default comes from the model's calculation settings.
 
 The building default corresponds to ISO 9613-2:2024 7.5.2's α=0.1 facade default;
 using the same default for standalone walls and selecting order 3 are application
@@ -670,7 +674,7 @@ calculation's default G; uncovered portions retain the default. Only the selecte
 variant's layers contribute. The G values and 2D geometry participate in the input
 fingerprint, and run metadata reports `ground_area_count`.
 
-Project validation checks all active ground-area layers, identifies both objects
+Model validation checks all active ground-area layers, identifies both objects
 and layers in overlap errors, and includes pending edits. Calculation preflight
 checks each selected variant and starts no batch if any has overlapping interiors.
 The standalone engine independently rejects overlaps before receiver calculation
@@ -687,7 +691,7 @@ XY. These boundary/degeneracy choices are Acalc conventions. Overlapping source
 and receiver influence regions are valid and are unrelated to polygon overlaps.
 
 Trees areas (`trees`) store an XY perimeter and `canopy_height`. The properties
-editor converts height to the project's chosen elevation units; storage remains
+editor converts height to the model's chosen elevation units; storage remains
 metres regardless of horizontal CRS units. There is no vertex Z/M, ground
 inference or terrain contribution. Each footprint describes dense vegetation
 from the calculation terrain to that terrain plus its height. Notes can record
@@ -778,10 +782,10 @@ supported by the chosen tool; users must review digitizing/interpolation default
 An individual UTF-8 `.json` export contains `format: "acalc-model-variant"`,
 `schema_version: 14`, `project_id`, `variant_id`, `name`, `definition`,
 `calculation` (the shared engine and settings), `layers` (the included registry
-records), `spectra` (both spectrum catalogs), and `directivities` (project directionality definitions, revisions and retained attachments).
+records), `spectra` (both spectrum catalogs), and `directivities` (model directionality definitions, revisions and retained attachments).
 Each spectrum is `{ "spectrum_id": "…", "name": "…", "spectrum": { … } }`.
 Variant source assignments are selected through included source features;
-catalog membership is project-wide, with no scenario-specific spectrum overrides.
+catalog membership is model-wide, with no scenario-specific spectrum overrides.
 `geopackage` is a filesystem path relative
 to the JSON file, not a URI. The JSON is a definition, **not a geometry snapshot**;
 engines read feature geometry from the referenced GeoPackage. Export validates all
@@ -906,7 +910,7 @@ Holes, rotated grids, and a user-defined grid origin are unsupported.
 After terrain resolution, each retained point samples ground Z from the
 final surface and uses `height_m` as its Height. Generated points do not seed or
 modify that surface. Their saved `geometry_gpkg_hex` is a generated POINT ZM,
-with X/Y converted back to project units, resolved ground Z, and shared height.
+with X/Y converted back to model units, resolved ground Z, and shared height.
 All input polygon geometry, properties, terrain and included building footprints
 participate in the input fingerprint. Grid generation is cancelable and bounded
 to 1,000,000 bounding-box candidates across all areas in a variant. Exceeding
@@ -981,7 +985,7 @@ size and SHA-256, checks its grid against the submitted boundary and spacing,
 then writes `<model stem>_results/<run UUID>/<area name>_<area UUID prefix>.tif`
 beside the GeoPackage: the engine's nine Float32 bands (dBA, then 63–8000 Hz
 unweighted) with the model CRS assigned and the geotransform converted from
-metres to project units (DEFLATE, floating-point predictor, tiled). These files
+metres to model units (DEFLATE, floating-point predictor, tiled). These files
 are outside the GeoPackage; move or copy the folder together with the model.
 Run metadata `area_rasters` lists, per area, `api_area_receiver_id`, `layer_id`,
 `object_id`, `path` (relative to the results folder), `receiver_count`,
@@ -1015,7 +1019,7 @@ which can be exported as a nine-band GeoTIFF. No VRT sidecar is needed and all
 pixels remain in the GeoPackage. Existing dBA-only surfaces are upgraded by
 **Refresh saved results**, using their already-saved octave totals.
 Grid pixels are centred on the calculated
-points at the saved `spacing_m` converted into project CRS units; raster row order
+points at the saved `spacing_m` converted into model CRS units; raster row order
 is north to south. Pixel footprints extend half a cell past their centre, including
 at perimeter samples. Missing/excluded and zero-energy samples use NoData and
 are transparent. The original numerical records retain the distinction between
@@ -1058,7 +1062,7 @@ the input snapshot again before committing and refuses results if another writer
 changed the model during calculation. Saving results does not change
 `acalc_project.modified_at`.
 
-The plugin marks saved results out of date if their saved project identity or
+The plugin marks saved results out of date if their saved model identity or
 modification timestamp differs from the current model. This is conservative: even
 a saved name change can make a run stale. The stored input hash records the exact
 input snapshot independently. Input-table triggers make normal external SQL edits

@@ -451,7 +451,7 @@ class CalculationUITests(ModelFixture):
         self.assertTrue(layer.isModified())
         self.plugin.commit_layer(layer)
         self.plugin.dock.project_name.setText("Unsaved name")
-        with self.assertRaisesRegex(ModelError, "project detail changes"):
+        with self.assertRaisesRegex(ModelError, "model detail changes"):
             self.plugin.calculate()
         self.plugin.dock.refresh_project()
         self.assertTrue(layer.startEditing())

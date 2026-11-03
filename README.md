@@ -5,7 +5,10 @@
 Acalc is a QGIS plugin for authoring outdoor acoustical models and calculating
 receiver sound levels through a separately running HTTP calculation engine.
 The model lives in a single GeoPackage, independent of the surrounding QGIS
-map. QGIS supplies map navigation, digitizing, snapping and undo; Acalc supplies
+map. Acalc calls each native `.gpkg` file a **model**; a QGIS project
+(`.qgz` or `.qgs`) stores the map and its layer presentation. A portable
+`.acalc-project.json` project is a shared container that can carry several
+models. QGIS supplies map navigation, digitizing, snapping and undo; Acalc supplies
 the model vocabulary, coordinate and property editors, variants, spectra and
 result layers.
 
@@ -105,7 +108,7 @@ results and the engine's 2024 method.
   terrain points and lines, ground absorption areas and dense foliage.
 - Terrain generated from elevation rasters, plus raster sampling of object
   ground elevations.
-- Project catalogs of octave-band sound power and absorption spectra, and
+- Model catalogs of octave-band sound power and absorption spectra, and
   directivity authoring.
 - Variants (scenarios) built from model layers.
 - Import from QGIS vector layers and OpenStreetMap buildings.
@@ -135,7 +138,7 @@ Connections are managed in the Acalc panel under **☰ → Settings**:
   Choose **☰ → New engine…**, then **Remote**, enter the instance's base URL (for example
   `http://<server-address>:8343`) and the client key, save, then choose **Test
   connection**. The key is stored only in QGIS's encrypted authentication
-  database, never in the project.
+  database, never in the model.
 
 Remote connections support HTTP on the LAN and HTTPS for public services. You can
 save several named connections using the adjacent **☰** menu; **Edit engine…**
@@ -245,7 +248,7 @@ The plugin package is `acalc/`. Principal modules:
 - `storage.py`: GeoPackage creation, validation, metadata and variants.
 - `schema.py`: shared types and identity helpers, without QGIS imports.
 - `layers.py`: QGIS styling, coordinate encoding and feature validation.
-- `spectra.py` / `spectra_ui.py`: octave-band data, project catalogs and editor.
+- `spectra.py` / `spectra_ui.py`: octave-band data, model catalogs and editor.
 - `api_connections.py` / `api_settings_ui.py`: named engine connections and capability discovery.
 - `api_client.py` / `engine_runner.py`: asynchronous HTTP requests and the calculation lifecycle.
 - `api_model.py`: normalized model snapshots and atomic result persistence.

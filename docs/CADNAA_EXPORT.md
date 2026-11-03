@@ -60,7 +60,7 @@ are limited to 40 characters and Windows-1252; full names remain in the report.
 
 Match weather, default ground factor, meteorological correction, reflection
 order, cutoff and integration settings manually from the report. The QSI package
-does not claim to set CadnaA's calculation configuration. Feet-based projects
+does not claim to set CadnaA's calculation configuration. Feet-based models
 export scaled metre XY in a local frame; do not assign the original feet-based
 EPSG code to those numbers. Check georeferencing before adding other layers.
 

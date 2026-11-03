@@ -95,7 +95,8 @@ class ModelDock(QDockWidget):
         menu_button.setPopupMode(QToolButton.InstantPopup)
         menu_button.setMinimumSize(32, 32)
         menu = QMenu(menu_button)
-        for title, key in (("Project", "project"), ("Calculation", "calculation"),
+        # Retain the internal page key used by existing callers.
+        for title, key in (("Model", "project"), ("Calculation", "calculation"),
                            ("Spectra", "spectra"), ("Directivity", "directivity"),
                            ("Sources", "sources"), ("Receivers", "receivers"),
                            ("Terrain", "terrain"), ("Objects", "objects"),
@@ -103,7 +104,7 @@ class ModelDock(QDockWidget):
             menu.addAction(title, lambda checked=False, view=key: self.show_view(view))
         menu_button.setMenu(menu)
         header.addWidget(menu_button)
-        self.heading = QLabel("Project")
+        self.heading = QLabel("Model")
         self.heading.setStyleSheet("font-size: 18px; font-weight: 600;")
         header.addWidget(self.heading, 1)
         brand = QLabel("ACALC")
@@ -150,7 +151,7 @@ class ModelDock(QDockWidget):
         self.objects_page = LayerTabsPage(
             (("building", "Buildings"), ("barrier", "Barriers")), self.show_view)
         self.stack.addWidget(self.objects_page)
-        self.status = QLabel("Create or open an Acalc GeoPackage to begin.")
+        self.status = QLabel("Create or open an Acalc model to begin.")
         self.status.setTextFormat(Qt.PlainText)
         self.status.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         self.status.setWordWrap(True)
@@ -168,9 +169,9 @@ class ModelDock(QDockWidget):
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 8, 0, 0)
         actions = QHBoxLayout()
-        button("New…", self.guarded(self.controller.new_project), actions)
-        button("Open…", self.guarded(self.controller.choose_project), actions)
-        self.close_button = button("Close", self.guarded(self.controller.close_project), actions)
+        button("New model…", self.guarded(self.controller.new_project), actions)
+        button("Open model…", self.guarded(self.controller.choose_project), actions)
+        self.close_button = button("Close model", self.guarded(self.controller.close_project), actions)
         layout.addLayout(actions)
         self.export_project_button = QPushButton("Export portable project…")
         self.export_project_button.clicked.connect(self.guarded(self.controller.export_portable_project))
@@ -186,7 +187,7 @@ class ModelDock(QDockWidget):
         content = QWidget()
         body = QVBoxLayout(content)
         body.setContentsMargins(0, 0, 6, 0)
-        self.save_metadata_button = QPushButton("Save project details")
+        self.save_metadata_button = QPushButton("Save model details")
         self.save_metadata_button.clicked.connect(self.guarded(self.controller.save_metadata))
         body.addWidget(self.save_metadata_button)
         self.project_form = QWidget()
@@ -238,8 +239,8 @@ class ModelDock(QDockWidget):
         self.project_log = QPlainTextEdit()
         self.project_log.setReadOnly(True)
         self.project_log.setMinimumHeight(160)
-        self.project_log.setAccessibleName("Project log")
-        self.project_log.setPlainText("Create or open an Acalc GeoPackage to begin.")
+        self.project_log.setAccessibleName("Model log")
+        self.project_log.setPlainText("Create or open an Acalc model to begin.")
         log_row.addWidget(self.project_log, 1)
         self.view_log_button = button("View log…", self.show_log, log_row)
         log_row.setAlignment(self.view_log_button, Qt.AlignTop)
@@ -440,7 +441,7 @@ class ModelDock(QDockWidget):
                     "calculation": self.calculation_page, "terrain": self.terrain_page,
                     "directivity": self.directivity_page,
                     "settings": self.settings_scroll}.get(key, self.stack.widget(0))
-            heading = key.title()
+            heading = "Model" if key == "project" else key.title()
         self.current_kind = key if key in LAYER_TYPES else None
         self.heading.setText(heading)
         self.stack.setCurrentWidget(page)
@@ -522,7 +523,7 @@ class ModelDock(QDockWidget):
         self.spectra_page.refresh()
         self.directivity_page.refresh()
         # Saved result metadata can contain large per-source diagnostics. Read it
-        # on navigation, not while opening a model or editing project details.
+        # on navigation, not while opening a model or editing model details.
         if store is None or self.stack.currentWidget() is self.results_page:
             self.results_page.refresh()
         self.calculation_page.refresh()

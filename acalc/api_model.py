@@ -155,7 +155,7 @@ def prepare_calculation(store, variant_id, capabilities, *, relationships=False)
         project = dict(db.execute("SELECT * FROM acalc_project").fetchone())
         keep_integration_reports = json.loads(project["metadata_json"]).get("keep_integration_reports") is True
         if keep_integration_reports and "integration_reports" not in capabilities.get("features", []):
-            raise ModelError("Project metadata requests full integration reports (keep_integration_reports=true), "
+            raise ModelError("Model metadata requests full integration reports (keep_integration_reports=true), "
                              "but the selected API does not advertise integration_reports. "
                              "Choose an engine that supports it, or remove the flag or set it to false in Other metadata (JSON).")
         if project["schema_version"] != SCHEMA_VERSION:
@@ -165,7 +165,7 @@ def prepare_calculation(store, variant_id, capabilities, *, relationships=False)
         if (srs.ImportFromWkt(project["crs_wkt"]) != 0 or not srs.IsProjected()
                 or not math.isclose(_number(scale, "horizontal_to_m", 0), srs.GetLinearUnits(), rel_tol=1e-12)
                 or scale <= 0 or project["vertical_unit"] != "m"):
-            raise ModelError("Project CRS must have verified projected XY units and metre vertical units.")
+            raise ModelError("Model CRS must have verified projected XY units and metre vertical units.")
         variant_row = db.execute("SELECT * FROM acalc_variants WHERE variant_id=?", (variant_id,)).fetchone()
         if variant_row is None:
             raise ModelError("The selected calculation variant no longer exists.")
@@ -198,7 +198,7 @@ def prepare_calculation(store, variant_id, capabilities, *, relationships=False)
             crs = db.execute("SELECT g.srs_id,s.definition FROM gpkg_geometry_columns g JOIN gpkg_spatial_ref_sys s ON g.srs_id=s.srs_id WHERE g.table_name=?", (table,)).fetchone()
             layer_srs = osr.SpatialReference()
             if crs is None or layer_srs.ImportFromWkt(crs[1]) != 0 or not srs.IsSame(layer_srs):
-                raise ModelError(f"{layer['name']}: layer CRS differs from project CRS.")
+                raise ModelError(f"{layer['name']}: layer CRS differs from model CRS.")
             if kind in ("point_receiver", "area_receiver", "measurement"):
                 receiver_layers.append({key: layer[key] for key in ("layer_id", "name", "feature_type")})
             provenance_rows[layer_id] = []
@@ -550,7 +550,7 @@ def area_raster_downloads(snapshot, result):
 
 
 def _finalize_area_raster(staged, final, raster, scale, crs_wkt):
-    """Check the engine GeoTIFF, then georeference it in project units and CRS."""
+    """Check the engine GeoTIFF, then georeference it in model units and CRS."""
     from osgeo import gdal
     with open(staged, "rb") as handle:
         digest = hashlib.sha256()
@@ -565,7 +565,7 @@ def _finalize_area_raster(staged, final, raster, scale, crs_wkt):
         raise ModelError("A downloaded area raster has the wrong size, bands or data type.")
     x, size, _, y, _, _ = raster["geotransform"]
     width, height = raster["columns"] * size, raster["rows"] * size
-    # API coordinates are metres; project XY are metres / horizontal_to_m.
+    # API coordinates are metres; model XY are metres / horizontal_to_m.
     bounds = [x / scale, y / scale, (x + width) / scale, (y - height) / scale]
     output = gdal.Translate(str(final), dataset, format="GTiff", outputSRS=crs_wkt, outputBounds=bounds,
                             creationOptions=["COMPRESS=DEFLATE", "PREDICTOR=3", "TILED=YES"])

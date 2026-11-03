@@ -141,7 +141,7 @@ class AcalcPlugin:
 
     def require_store(self):
         if self.store is None:
-            raise ModelError("Create or open an Acalc project first.")
+            raise ModelError("Create or open an Acalc model first.")
         return self.store
 
     def selected_record(self):
@@ -181,7 +181,7 @@ class AcalcPlugin:
             self.project.setCrs(dialog.crs.crs())
 
     def choose_project(self):
-        path, _ = QFileDialog.getOpenFileName(self.dock, "Open Acalc project", QSettings().value("acalc/last_directory", ""), "Acalc projects (*.gpkg *.acalc-project.json);;Acalc GeoPackage (*.gpkg);;Portable project (*.acalc-project.json)")
+        path, _ = QFileDialog.getOpenFileName(self.dock, "Open Acalc model", QSettings().value("acalc/last_directory", ""), "Acalc models and portable projects (*.gpkg *.acalc-project.json);;Acalc model GeoPackage (*.gpkg);;Portable project (*.acalc-project.json)")
         if path:
             if path.endswith(".acalc-project.json"):
                 self.import_portable_project(path)
@@ -219,7 +219,7 @@ class AcalcPlugin:
         if any(layer.isModified() for layer in self.layers.values()):
             raise ModelError("Save model layer edits before exporting a portable project.")
         if self.dock.metadata_values() != self.metadata_snapshot or self.dock.calculation_page.dirty():
-            raise ModelError("Save project details and calculation parameters before exporting a portable project.")
+            raise ModelError("Save model details and calculation parameters before exporting a portable project.")
         path, _ = QFileDialog.getSaveFileName(self.dock, "Export portable project", str(Path(store.path).with_suffix(".acalc-project.json")), "Portable project (*.acalc-project.json)")
         if not path:
             return False
@@ -242,7 +242,7 @@ class AcalcPlugin:
                 continue
             uri = QgsProviderRegistry.instance().decodeUri("ogr", candidate.source())
             if str(Path(uri.get("path", "")).resolve()) == target_path and "infer_z" in candidate.fields().names():
-                raise ModelError(f"{candidate.name()}: save or discard layer edits and close its edit session before upgrading this project's elevation fields.")
+                raise ModelError(f"{candidate.name()}: save or discard layer edits and close its edit session before upgrading this model's elevation fields.")
         store = ModelStore.open(path)
         if self.store and self.store.path == store.path:
             self.reload_layers()
@@ -662,7 +662,7 @@ class AcalcPlugin:
             return True
         details = []
         if metadata_dirty:
-            details.append("project details")
+            details.append("model details")
         if calculation_dirty:
             details.append("calculation parameters")
         details.extend(layer.name() for layer in dirty)
@@ -747,7 +747,7 @@ class AcalcPlugin:
         self.require_store().update_metadata(name, author, description, datum, metadata)
         self.ensure_group().setName("Acalc · " + name.strip())
         self.dock.refresh_project()
-        self.message("Project details saved.")
+        self.message("Model details saved.")
 
     def change_project_coordinates(self):
         from .project_coordinates import change_coordinates
@@ -779,7 +779,7 @@ class AcalcPlugin:
                 editor.set_input_unit(input_unit(store))
         self.dock.refresh_project()
         self.iface.mapCanvas().refresh()
-        self.message("Project CRS and input units saved. Existing results are out of date.")
+        self.message("Model CRS and input units saved. Existing results are out of date.")
 
     def edit_spectrum(self, create=False, duplicate=False):
         store = self.require_store()
@@ -826,7 +826,7 @@ class AcalcPlugin:
                 continue
             self.dock.refresh_project(metadata=False)
             page.refresh(selected)
-            self.message("Spectrum saved to the project. Shared assignments use the updated values.")
+            self.message("Spectrum saved to the model. Shared assignments use the updated values.")
             return
 
     def delete_spectrum(self):
@@ -843,7 +843,7 @@ class AcalcPlugin:
             raise ModelError("Save or discard source layer edits before deleting a sound power spectrum, so undo cannot restore a deleted reference."
                              if column == "spectrum_id" else
                              "Save or discard building and wall layer edits before deleting an absorption spectrum, so undo cannot restore a deleted reference.")
-        if QMessageBox.question(self.dock, "Delete spectrum", f"Delete “{record['name']}” from this project?",
+        if QMessageBox.question(self.dock, "Delete spectrum", f"Delete “{record['name']}” from this model?",
                                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
             return
         store.delete_spectrum(record["spectrum_id"])
@@ -890,7 +890,7 @@ class AcalcPlugin:
                 continue
             self.dock.refresh_project(metadata=False)
             page.refresh(identity)
-            self.message("Directionality saved to the project local library.")
+            self.message("Directionality saved to the model local library.")
             return identity
         return None
 
@@ -906,7 +906,7 @@ class AcalcPlugin:
         if any(layer.isEditable() and any(self.matches(layer, record) for record in sources)
                for layer in self.project.mapLayers().values() if hasattr(layer, "isEditable")):
             raise ModelError("Save or discard point-source layer edits before deleting directionality, so undo cannot restore a deleted reference.")
-        if QMessageBox.question(self.dock, "Delete directionality", f"Delete “{record['name']}” from this project?",
+        if QMessageBox.question(self.dock, "Delete directionality", f"Delete “{record['name']}” from this model?",
                                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
             return
         store.delete_directivity(identity)
@@ -1027,7 +1027,7 @@ class AcalcPlugin:
         self._remove_layer(self.selected_layer(), self.selected_record())
 
     def _remove_layer(self, layer, record):
-        answer = QMessageBox.question(self.dock, "Remove model layer", f"Remove “{layer.name()}” from this model and all variants?\n\nIts saved data will remain in the GeoPackage and can be restored from the Project view.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        answer = QMessageBox.question(self.dock, "Remove model layer", f"Remove “{layer.name()}” from this model and all variants?\n\nIts saved data will remain in the GeoPackage and can be restored from the Model view.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if answer != QMessageBox.Yes:
             return
         if layer.isModified():
@@ -1042,7 +1042,7 @@ class AcalcPlugin:
         finally:
             self._changing = False
         self.dock.refresh_project(metadata=False)
-        self.message("Layer removed. Use Project → Restore layer to bring it back.")
+        self.message("Layer removed. Use Model → Restore layer to bring it back.")
 
     def restore_layer(self):
         records = self.require_store().layers(archived=True)
@@ -1526,7 +1526,7 @@ class AcalcPlugin:
         if self.engine_runner.active:
             raise ModelError("A calculation is already running.")
         if self.dock.metadata_values() != self.metadata_snapshot:
-            raise ModelError("Save or discard project detail changes before calculating.")
+            raise ModelError("Save or discard model detail changes before calculating.")
         model_layers = self.prepare_calculation_layers(self.back_calculation_dialog)
         if model_layers is None:
             return False
@@ -1557,7 +1557,7 @@ class AcalcPlugin:
         if self.engine_runner.active:
             raise ModelError("Wait for the active calculation before applying fitted spectra.")
         if self.dock.metadata_values() != self.metadata_snapshot:
-            raise ModelError("Save or discard project detail changes and evaluate the fit again.")
+            raise ModelError("Save or discard model detail changes and evaluate the fit again.")
         if any(layer.isModified() for layer, _ in self.model_provider_layers()):
             raise ModelError("The model has unsaved layer edits. Save or discard them and evaluate the fit again.")
         store.apply_back_calculation(relationships, proposals)
@@ -1576,7 +1576,7 @@ class AcalcPlugin:
         if self.engine_runner.active:
             raise ModelError("A calculation is already running.")
         if self.dock.metadata_values() != self.metadata_snapshot:
-            raise ModelError("Save or discard project detail changes before calculating.")
+            raise ModelError("Save or discard model detail changes before calculating.")
         model_layers = self.prepare_calculation_layers(self.calculation_dialog)
         if model_layers is None:
             return False

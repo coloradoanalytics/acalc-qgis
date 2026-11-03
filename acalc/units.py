@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Colorado Analytics
-"""Project length display units; persisted acoustic quantities remain SI."""
+"""Model length display units; persisted acoustic quantities remain SI."""
 
 from dataclasses import dataclass
 import math

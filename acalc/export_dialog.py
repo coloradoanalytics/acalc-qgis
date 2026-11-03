@@ -84,7 +84,7 @@ class ExportDialog(QDialog):
         self.export_button.setEnabled(False)
         try:
             if self.controller.store is not self.store:
-                raise ModelError("The project changed. Reopen the export window.")
+                raise ModelError("The model changed. Reopen the export window.")
             # Reuse edit-buffer protection; saved disk contents must match what
             # the user sees. The operation never calls a calculation service.
             if self.controller.prepare_calculation_layers(self) is None:

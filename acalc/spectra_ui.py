@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Colorado Analytics
-"""Project spectrum library and native octave-band editor."""
+"""Model spectrum library and native octave-band editor."""
 
 from pathlib import Path
 from decimal import Decimal, ROUND_HALF_UP
@@ -131,8 +131,8 @@ class SpectrumDialog(QDialog):
             self.power_basis.currentIndexChanged.connect(self.update_overall)
         self.update_overall()
         layout.addWidget(wrapped_label(
-            "Shared values update every assigned source. Save writes to the project."
-            if power else "Shared values update every assigned building and wall, across all variants. Save writes to the project."))
+            "Shared values update every assigned source. Save writes to the model."
+            if power else "Shared values update every assigned building and wall, across all variants. Save writes to the model."))
         self.usage = wrapped_label("")
         layout.addWidget(self.usage)
         self.error = wrapped_label("")
@@ -252,7 +252,7 @@ class SpectraPage(QWidget):
             widget.clicked.connect(lambda checked=False, action=callback: controller.run(action))
             actions.addWidget(widget)
         layout.insertLayout(layout.indexOf(self.table), actions)
-        layout.addWidget(wrapped_label("This library belongs to the open project and is shared by all its variants. Double-click a spectrum to edit it."))
+        layout.addWidget(wrapped_label("This library belongs to the open model and is shared by all its variants. Double-click a spectrum to edit it."))
         self.tabs.currentChanged.connect(lambda *args: self.refresh())
         self.records = {}
 

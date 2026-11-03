@@ -59,7 +59,7 @@ Routes below are relative to the configured base URL.
   `GET /healthz` is always unauthenticated. HTTP 401 with error code
   `unauthorized` means a missing or incorrect client key, not an unreachable server.
 - Connection choices and authentication references live in the QGIS user profile.
-  Keys live only in the encrypted QGIS authentication database, never projects,
+  Keys live only in the encrypted QGIS authentication database, never models,
   metadata, logs or saved run records. Remote connections support HTTP on the LAN
   and HTTPS for public services.
 
@@ -214,10 +214,10 @@ model and relabel it as measured ground.
 
 | GeoPackage data | Required normalized API treatment |
 | --- | --- |
-| `acalc_project` | Read schema version, project ID, CRS WKT, `horizontal_to_m`, vertical datum and revision information. Verify the projected metric coordinate interpretation. Preserve provenance in the frontend run record. |
+| `acalc_project` | Read schema version, model ID (`project_id`), CRS WKT, `horizontal_to_m`, vertical datum and revision information. Verify the projected metric coordinate interpretation. Preserve provenance in the frontend run record. |
 | `acalc_variants.definition_json.layer_ids` | Resolve exactly the selected variant's layers through `acalc_layers.layer_id`, `table_name`, `feature_type`, with `archived = 0`. Read those actual feature tables, usually named `model_<UUID hex>`. Layer visibility, current selection, QGIS FIDs and legacy `enabled` fields do not filter the calculation. |
-| Feature identities | Namespace each API ID by project/layer/object as necessary to preserve unique identity. Save the reversible mapping; don't use a changing row index as an object ID. |
-| Point/line/area `geom` coordinates | GeoPackage X/Y are project units; multiply by the verified horizontal-to-metre factor. Z is ground elevation in metres and M is acoustic height in metres. After ground resolution, API absolute acoustic Z is `ground_Z + M`. Do not treat M as another XY unit or Z as already including height. |
+| Feature identities | Namespace each API ID by model/layer/object as necessary to preserve unique identity. Save the reversible mapping; don't use a changing row index as an object ID. |
+| Point/line/area `geom` coordinates | GeoPackage X/Y are model units; multiply by the verified horizontal-to-metre factor. Z is ground elevation in metres and M is acoustic height in metres. After ground resolution, API absolute acoustic Z is `ground_Z + M`. Do not treat M as another XY unit or Z as already including height. |
 | `infer_z`, ground modes, terrain inputs | Send explicit ground XYZ/breaklines plus named `terrain.inference_points` for original inferred vertices. Use `ground_ref` and indexed `geometry` to preserve staged inference for sources, receivers, buildings and walls. `position_xy` + `height_m` is for final-terrain sampling that does not add a terrain vertex. |
 | `point_source` | Join `spectrum_id`, normalize its spectrum, emit `kind: point` and an absolute or ground-referenced location. |
 | `area_source` | Preserve original ID and actual 3D emitting domain with an explicit nonoverlapping triangle mesh. Respect the established surface definition; reject ambiguous nonplanar polygon triangulation. Map catalog power basis as below. |
@@ -257,7 +257,7 @@ Settings require explicit mapping rather than passing the old settings object:
 
 Persist the exact submitted snapshot, normalized settings, backend/version,
 variant membership and the ID mapping with the completed run. Convert returned
-XYZ back to project XY units and the GeoPackage ground/height representation
+XYZ back to model XY units and the GeoPackage ground/height representation
 using the saved mapping. Only completed results may replace the variant's
 previous results. Failures/cancellation leave earlier results intact; a valid
 completed empty receiver grid intentionally replaces them with an empty set.
@@ -502,7 +502,7 @@ parent's table. Evaluate direction on the actual first nonzero route segment;
 apply the correction once. The hypothetical cap reference uses its own launch
 direction and retains directivity.
 
-World +X/+Y/+Z means project grid east/north/up after the frontend's metric
+World +X/+Y/+Z means model grid east/north/up after the frontend's metric
 coordinate conversion. Preserve the model's source-local +X front, +Y left,
 +Z up orientation. A client converting a stored matrix to yaw/pitch/roll must
 preserve that rotation, including at Euler singularities; it cannot substitute
@@ -1032,7 +1032,7 @@ report nothing. See ALGORITHM.md, *Pruning and omission accounting*.
 
 The retired `receiver_margin_db` input is accepted only for compatibility
 (null or a finite positive number), ignored, and omitted from resolved result
-settings. The plugin removes saved values when loading a project and no longer
+settings. The plugin removes saved values when loading a model and no longer
 sends this key. Historical requests remain replayable without relative pruning.
 
 For implementations that use reflector-prefix pruning, interim pseudo-receptor

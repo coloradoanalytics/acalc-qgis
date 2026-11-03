@@ -176,7 +176,7 @@ class LayerPresentationTests(ModelFixture):
         dock = self.plugin.dock
         menu = dock.findChild(QToolButton).menu()
         self.assertEqual([action.text() for action in menu.actions()],
-                         ['Project', 'Calculation', 'Spectra', 'Directivity',
+                         ['Model', 'Calculation', 'Spectra', 'Directivity',
                           'Sources', 'Receivers', 'Terrain', 'Objects', 'Results', 'Settings'])
         actions = {action.text() for action in menu.actions()}
         self.assertTrue({"Sources", "Receivers"} <= actions)

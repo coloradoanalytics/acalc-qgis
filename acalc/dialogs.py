@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Colorado Analytics
-"""Small native dialogs for project creation and exact geometry entry."""
+"""Small native dialogs for model creation and exact geometry entry."""
 
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QBrush, QColor, QPalette
@@ -57,10 +57,10 @@ class InactiveCellDelegate(QStyledItemDelegate):
 class NewProjectDialog(QDialog):
     def __init__(self, parent, crs):
         super().__init__(parent)
-        self.setWindowTitle("New Acalc project")
+        self.setWindowTitle("New Acalc model")
         self.resize(560, 340)
         layout = QVBoxLayout(self)
-        intro = QLabel("Create a portable acoustical model. Choose a local projected CRS suited to the project site. Coordinates and distance inputs follow its units.")
+        intro = QLabel("Create an acoustical model in a GeoPackage. Choose a local projected CRS suited to the site. Coordinates and distance inputs follow its units.")
         intro.setWordWrap(True)
         layout.addWidget(intro)
         form = QFormLayout()
@@ -74,7 +74,7 @@ class NewProjectDialog(QDialog):
         path_row.addWidget(browse)
         self.crs = QgsProjectionSelectionWidget()
         self.crs.setCrs(crs if crs.isValid() and not crs.isGeographic() else QgsCoordinateReferenceSystem())
-        form.addRow("Project name", self.name)
+        form.addRow("Model name", self.name)
         form.addRow("Author / organization", self.author)
         form.addRow("GeoPackage", path_row)
         form.addRow("Horizontal CRS", self.crs)
@@ -86,7 +86,7 @@ class NewProjectDialog(QDialog):
         form.addRow("Elevation / height units", self.elevation_units)
         layout.addLayout(form)
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.button(QDialogButtonBox.Ok).setText("Create project")
+        buttons.button(QDialogButtonBox.Ok).setText("Create model")
         buttons.accepted.connect(self.validate)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -106,7 +106,7 @@ class NewProjectDialog(QDialog):
             if not self.crs.crs().isValid() or self.crs.crs().isGeographic():
                 raise ModelError("Choose a projected horizontal coordinate system.")
         except ModelError as error:
-            QMessageBox.warning(self, "New project", str(error))
+            QMessageBox.warning(self, "New model", str(error))
             return
         self.accept()
 
@@ -115,7 +115,7 @@ class ProjectCoordinatesDialog(QDialog):
     def __init__(self, parent, store):
         super().__init__(parent)
         from .units import elevation_unit
-        self.setWindowTitle("Project CRS and units")
+        self.setWindowTitle("Model CRS and units")
         self.resize(600, 300)
         layout = QVBoxLayout(self)
         form = QFormLayout()
@@ -641,7 +641,7 @@ class FeatureDialog(QDialog):
             count = len(missing_bands(value))
             self.spectrum_status.setText(POWER_BASES[value["power_basis"]] + " · 0 = no energy\n" + (f"{count} band(s) still unknown. " if count else "All bands specified. ") + value["provenance"])
         else:
-            self.spectrum_status.setText("Assign a project sound power spectrum before calculation. Geometry can be saved without one.")
+            self.spectrum_status.setText("Assign a model sound power spectrum before calculation. Geometry can be saved without one.")
 
     def refresh_absorption(self):
         reference = self.absorption_combo.currentData()
@@ -662,7 +662,7 @@ class FeatureDialog(QDialog):
                       if missing else "All bands specified. α = 0 fully reflects; α = 1 fully absorbs.")
             self.absorption_status.setText(status + "\nReference: " + (value["provenance"] or "Not specified"))
         elif reference:
-            self.absorption_status.setText("Calculation unavailable: the assigned absorption spectrum is missing or incompatible. Choose a project absorption spectrum or clear this assignment.")
+            self.absorption_status.setText("Calculation unavailable: the assigned absorption spectrum is missing or incompatible. Choose a model absorption spectrum or clear this assignment.")
         else:
             self.absorption_status.setText("No absorption spectrum assigned. The single absorption value above applies to every octave band.")
 

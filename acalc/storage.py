@@ -202,7 +202,7 @@ class ModelStore(DirectivityStore):
         portable = Path(store.path).with_suffix(".acalc-qgis.json").is_file()
         preserve_native = preserve_native or portable
         if not Path(store.path).is_file():
-            raise ModelError("The project file does not exist.")
+            raise ModelError("The model file does not exist.")
         try:
             with store.connection(readonly=True) as db:
                 if db.execute("PRAGMA application_id").fetchone()[0] != 0x47504B47:
@@ -230,7 +230,7 @@ class ModelStore(DirectivityStore):
                 if project["vertical_unit"] != "m" or not isinstance(json.loads(project["metadata_json"]), dict):
                     raise ModelError("Invalid model metadata or vertical units.")
                 if json.loads(project["metadata_json"]).get("elevation_unit", json.loads(project["metadata_json"]).get("input_length_unit", "m")) not in ("m", "ft"):
-                    raise ModelError("Invalid project elevation unit; choose meters or feet.")
+                    raise ModelError("Invalid model elevation unit; choose meters or feet.")
                 layers = db.execute("SELECT * FROM acalc_layers").fetchall()
                 for layer in layers:
                     kind = LAYER_TYPES.get(layer["feature_type"])
@@ -314,7 +314,7 @@ class ModelStore(DirectivityStore):
             raise ModelError(f"Not a valid Acalc model GeoPackage: {error}") from error
         except ModelError as error:
             if "no such table" in str(error):
-                raise ModelError("This GeoPackage is not an Acalc model. Create a new Acalc project first.") from error
+                raise ModelError("This GeoPackage is not an Acalc model. Create a new Acalc model first.") from error
             raise
         if preserve_native and version != SCHEMA_VERSION:
             raise ModelError("Portable native models require the current model schema; upgrade a separate native copy first.")
@@ -843,7 +843,7 @@ class ModelStore(DirectivityStore):
                 if not isinstance(metadata, dict):
                     raise ModelError("Additional metadata must be a JSON object.")
                 if metadata.get("elevation_unit", metadata.get("input_length_unit", "m")) not in ("m", "ft"):
-                    raise ModelError("Choose meters or feet for project inputs.")
+                    raise ModelError("Choose meters or feet for model inputs.")
                 db.execute("UPDATE acalc_project SET metadata_json=?", (json.dumps(metadata, allow_nan=False),))
 
     def touch(self):
@@ -1294,7 +1294,7 @@ class ModelStore(DirectivityStore):
     def delete_variant(self, config_id):
         with self.connection() as db:
             if db.execute("SELECT COUNT(*) FROM acalc_variants").fetchone()[0] <= 1:
-                raise ModelError("Keep at least one variant in the project.")
+                raise ModelError("Keep at least one variant in the model.")
             db.execute("DELETE FROM acalc_variants WHERE variant_id=?", (config_id,))
             db.execute("UPDATE acalc_project SET modified_at=?", (now(),))
 

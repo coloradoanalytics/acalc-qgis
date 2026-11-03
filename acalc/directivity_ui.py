@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Colorado Analytics
-"""Project directionality library, table editor, and point-source assignment."""
+"""Model directionality library, table editor, and point-source assignment."""
 
 from copy import deepcopy
 import csv
@@ -54,7 +54,7 @@ class DirectivityDialog(QDialog):
     def __init__(self, parent=None, record=None, input_unit="m"):
         super().__init__(parent)
         self.input_unit = input_unit
-        self.setWindowTitle("Directionality · project local library")
+        self.setWindowTitle("Directionality · model local library")
         self.resize(1080, 800)
         self.value = None
         self._loading = False
@@ -134,7 +134,7 @@ class DirectivityDialog(QDialog):
         layout.addLayout(reference)
         self.provenance = wrapped_label("")
         layout.addWidget(self.provenance)
-        self.usage = wrapped_label("This definition is shared by assigned sources across all project variants.")
+        self.usage = wrapped_label("This definition is shared by assigned sources across all model variants.")
         layout.addWidget(self.usage)
         self.status = wrapped_label("")
         layout.addWidget(self.status)
@@ -364,7 +364,7 @@ class DirectivityPage(QWidget):
         self.controller = controller
         self.records = {}
         layout = QVBoxLayout(self)
-        layout.addWidget(wrapped_label("Project local directionality library · shared by all variants"))
+        layout.addWidget(wrapped_label("Model local directionality library · shared by all variants"))
         self.table = QTableWidget(0, 2)
         self.table.setHorizontalHeaderLabels(["Name", "Values"])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
@@ -472,7 +472,7 @@ class SourceDirectivityWidget(QWidget):
                 rotate.addWidget(button, r, col)
             rotate.addWidget(spin, r, 2)
         controls.addLayout(rotate)
-        controls.addWidget(wrapped_label("Degrees · fixed project axes"))
+        controls.addWidget(wrapped_label("Degrees · fixed model axes"))
         self.undo_button = QPushButton("Undo last orientation change")
         self.undo_button.clicked.connect(self.undo)
         controls.addWidget(self.undo_button)
@@ -500,7 +500,7 @@ class SourceDirectivityWidget(QWidget):
         self.limit = wrapped_label("")
         self.preview.layout().insertWidget(2, self.limit)
         self.edit_button.setToolTip("Edits save immediately to the shared library, independently of source Apply/Cancel.")
-        self.new_button.setToolTip("Create a saved project library definition, then assign it to this source.")
+        self.new_button.setToolTip("Create a saved model library definition, then assign it to this source.")
         self.fill_choices(identity)
         self.choice.currentIndexChanged.connect(self.changed_choice)
         self.refresh(pattern=True)

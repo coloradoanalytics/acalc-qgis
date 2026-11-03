@@ -387,7 +387,7 @@ def validate_layer(layer, kind, spectra=None, require_spectra=False, directiviti
                 identity = feature_value(feature, "directivity_id")
                 if identity and directivities is not None:
                     if identity not in directivities:
-                        raise ModelError("Source directionality must reference a definition in this project.")
+                        raise ModelError("Source directionality must reference a definition in this model.")
                     value = directivities[identity]["definition"]
                     if upright(value) and dot(transform(pose, principal_vector(value)), AXES["Up"]) < 1 - 1e-8:
                         raise ModelError("Stack directionality requires the principal to point Up.")
@@ -407,7 +407,7 @@ def validate_layer(layer, kind, spectra=None, require_spectra=False, directiviti
                         record = spectra.get(identity)
                         source_type = source.get("type", "area")
                         if record is None or record["spectrum"]["kind"] != "sound_power" or not compatible_power(record["spectrum"], source_type + "_source"):
-                            raise ModelError(f"{source['name']}: choose a project {source_type} sound power spectrum.")
+                            raise ModelError(f"{source['name']}: choose a model {source_type} sound power spectrum.")
                         if require_spectra and missing_bands(record["spectrum"]):
                             raise ModelError(f"{source['name']}: sound power bands are unknown.")
                     if require_spectra and not identity:
@@ -426,7 +426,7 @@ def validate_layer(layer, kind, spectra=None, require_spectra=False, directiviti
                 if reference and spectra is not None:
                     record = spectra.get(reference)
                     if record is None or record["spectrum"]["kind"] != "absorption":
-                        raise ModelError("Surface material must reference an absorption spectrum in this project.")
+                        raise ModelError("Surface material must reference an absorption spectrum in this model.")
                     if require_spectra:
                         missing = missing_bands(record["spectrum"])
                         if missing:
@@ -461,7 +461,7 @@ def validate_layer(layer, kind, spectra=None, require_spectra=False, directiviti
                 reference = "" if reference is None or str(reference) == "NULL" else str(reference)
                 record = spectra.get(reference)
                 if reference and (record is None or record["spectrum"]["kind"] != "sound_power"):
-                    raise ModelError("Source spectrum must reference a sound power spectrum in this project.")
+                    raise ModelError("Source spectrum must reference a sound power spectrum in this model.")
                 if record and not compatible_power(record["spectrum"], kind.key):
                     raise ModelError("This spectrum power basis is incompatible with this source type.")
                 if require_spectra:
@@ -505,7 +505,7 @@ def synchronize_measurement_broadband(layer):
 def ground_absorption_overlap_errors(layers):
     """Reject positive-area intersections, including containment and duplicates.
 
-    The supplied layers define the scope: the whole project for model validation,
+    The supplied layers define the scope: the whole model for model validation,
     or one variant for calculation. Their geometries share the model CRS. A
     spatial index avoids testing every pair, while GEOS area distinguishes real
     overlaps from allowed shared edges and vertices. Invalid polygons are already
