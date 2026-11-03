@@ -1,6 +1,6 @@
 # Acalc for QGIS
 
-**[Releases and downloads](releases/README.md)** · [QGIS plugin 0.8.3 ZIP](https://github.com/coloradoanalytics/acalc-qgis/raw/refs/heads/main/releases/0.8.3/acalc-qgis-0.8.3.zip) · [Complete setup](#install-and-run-acalc)
+**[Releases and downloads](releases/README.md)** · [QGIS plugin 0.8.4 ZIP](https://github.com/coloradoanalytics/acalc-qgis/raw/refs/heads/main/releases/0.8.4/acalc-qgis-0.8.4.zip) · [Complete setup](#install-and-run-acalc)
 
 Acalc is a QGIS plugin for authoring outdoor acoustical models and calculating
 receiver sound levels through a separately running HTTP calculation engine.
@@ -12,7 +12,7 @@ models. QGIS supplies map navigation, digitizing, snapping and undo; Acalc suppl
 the model vocabulary, coordinate and property editors, variants, spectra and
 result layers.
 
-> **Status: beta (0.8.3).** The plugin is marked experimental in QGIS. Model
+> **Status: beta (0.8.4).** The plugin is marked experimental in QGIS. Model
 > formats and the calculation API may still change between releases, and
 > calculation results are not certified for regulatory use.
 
@@ -29,10 +29,10 @@ The plugin needs no additional Python packages. Model editing works offline;
 the precompiled calculation programs below are for Linux and Windows x86-64
 (Intel/AMD 64-bit computers).
 
-1. Download **[acalc-qgis-0.8.3.zip](https://github.com/coloradoanalytics/acalc-qgis/raw/refs/heads/main/releases/0.8.3/acalc-qgis-0.8.3.zip)**. Keep this file zipped.
+1. Download **[acalc-qgis-0.8.4.zip](https://github.com/coloradoanalytics/acalc-qgis/raw/refs/heads/main/releases/0.8.4/acalc-qgis-0.8.4.zip)**. Keep this file zipped.
    Use this installer link, rather than GitHub's **Code → Download ZIP** source archive.
 2. In QGIS, open **Plugins → Manage and Install Plugins → Install from ZIP**,
-   select `acalc-qgis-0.8.3.zip`, and click **Install Plugin**.
+   select `acalc-qgis-0.8.4.zip`, and click **Install Plugin**.
 3. Enable **Acalc** under **Installed**, then open **Plugins → Acalc → Acalc**
    or click the Acalc toolbar icon.
 
