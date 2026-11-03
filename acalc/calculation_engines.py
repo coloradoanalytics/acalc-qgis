@@ -34,15 +34,18 @@ def available_engines(connection_store=None):
         if profiles is None:
             profiles = [{"default": True, "state": "ready", "capabilities": connection["capabilities"],
                          "links": {"capabilities": "v1/capabilities", "calculations": "v1/calculations"}}]
-        for profile in profiles:
-            caps = profile.get("capabilities")
-            if profile.get("state") != "ready" or profile.get("error") or capabilities_problem(caps):
-                continue
+        compatible = [profile for profile in profiles
+                      if profile.get("state") == "ready" and not profile.get("error")
+                      and not capabilities_problem(profile.get("capabilities"))]
+        for profile in compatible:
+            caps = profile["capabilities"]
             selected = deepcopy(connection)
             selected["capabilities"] = deepcopy(caps)
-            # Preserve existing default-engine model selections across discovery.
+            # The only compatible ISO engine keeps the connection identity used
+            # by older saved calculations. Multiple compatible engines need
+            # explicit names; a former default flag cannot choose between them.
             identity = engine_identity(selected)
-            if not profile.get("default"):
+            if len(compatible) != 1:
                 identity += ":engine:" + profile["name"]
             engines.append(CalculationEngine(
                 id=identity,

@@ -315,24 +315,27 @@ class RemoteConnectionTests(unittest.TestCase):
         self.assertIn("version unknown", page.engines.item(0).text())
         self.assertEqual(available_engines(self.store), ())
 
-    def test_default_room_profile_without_iso_fields_keeps_nondefault_iso_usable(self):
+    def test_room_profile_without_iso_fields_keeps_unnamed_iso_selection_usable(self):
         saved = self.remote()
         page, client = self.page()
         room = engine("room", default=True, version="0.2.0")
+        room.pop("default")
+        iso = engine("iso", default=False)
+        iso.pop("default")
         room["method"] = "engine-room geometric/1"
         room_caps = room_capabilities()
         for room_failure in (False, True):
             with self.subTest(room_failure=room_failure):
                 page._test()
                 client.respond({"status": "ok", "key_required": True, "role": "calculation"})
-                client.respond({"engines": [room, engine("iso", default=False)]})
+                client.respond({"engines": [room, iso]})
                 if room_failure:
                     client.respond(error=ApiError("Room unavailable", status=503))
                 else:
                     client.respond(room_caps)
                 client.respond(capabilities())
                 selected, = available_engines(self.store)
-                self.assertTrue(selected.id.endswith(":engine:iso"))
+                self.assertFalse(selected.id.endswith(":engine:iso"))
                 self.assertEqual(selected.capabilities_path, "/v1/engines/iso/capabilities")
                 self.assertEqual(selected.calculations_path, "/v1/engines/iso/calculations")
                 self.assertEqual(selected.connection["id"], saved["id"])
