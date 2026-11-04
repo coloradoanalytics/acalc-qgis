@@ -45,8 +45,8 @@ Download **both archives in the row for your computer**. The [service releases](
 
 | Computer | Acalc Engine service | ISO calculation engine |
 | --- | --- | --- |
-| Linux x86-64 | [acalc-engine-0.1.2-linux-x86_64.tar.gz](https://github.com/coloradoanalytics/acalc-engine/raw/refs/heads/main/releases/0.1.2/acalc-engine-0.1.2-linux-x86_64.tar.gz) | [engine-iso-0.1.0-linux-x86_64.tar.gz](https://github.com/coloradoanalytics/engine-iso/raw/refs/heads/main/releases/0.1.0/engine-iso-0.1.0-linux-x86_64.tar.gz) |
-| Windows x86-64 | [acalc-engine-0.1.2-windows-x86_64.zip](https://github.com/coloradoanalytics/acalc-engine/raw/refs/heads/main/releases/0.1.2/acalc-engine-0.1.2-windows-x86_64.zip) | [engine-iso-0.1.0-windows-x86_64.zip](https://github.com/coloradoanalytics/engine-iso/raw/refs/heads/main/releases/0.1.0/engine-iso-0.1.0-windows-x86_64.zip) |
+| Linux x86-64 | [acalc-engine-0.1.4-linux-x86_64.tar.gz](https://github.com/coloradoanalytics/acalc-engine/raw/refs/heads/main/releases/0.1.4/acalc-engine-0.1.4-linux-x86_64.tar.gz) | [engine-iso-0.1.4-linux-x86_64.tar.gz](https://github.com/coloradoanalytics/engine-iso/raw/refs/heads/main/releases/0.1.4/engine-iso-0.1.4-linux-x86_64.tar.gz) |
+| Windows x86-64 | [acalc-engine-0.1.4-windows-x86_64.zip](https://github.com/coloradoanalytics/acalc-engine/raw/refs/heads/main/releases/0.1.4/acalc-engine-0.1.4-windows-x86_64.zip) | [engine-iso-0.1.4-windows-x86_64.zip](https://github.com/coloradoanalytics/engine-iso/raw/refs/heads/main/releases/0.1.4/engine-iso-0.1.4-windows-x86_64.zip) |
 
 1. Extract the **acalc-engine service archive** into a writable location. Open
    the extracted service folder containing `acalc-engine` (or `acalc-engine.exe`)
@@ -58,10 +58,10 @@ Download **both archives in the row for your computer**. The [service releases](
    | Linux | Windows |
    | --- | --- |
    | `acalc-engine` | `acalc-engine.exe` |
-   | `engines/engine-iso-0.1.0-linux-x86_64/engine-iso-0.1.0` | `engines/engine-iso-0.1.0-windows-x86_64/engine-iso-0.1.0.exe` |
+   | `engines/engine-iso-0.1.4-linux-x86_64/engine-iso-0.1.4` | `engines/engine-iso-0.1.4-windows-x86_64/engine-iso-0.1.4.exe` |
 
 3. On Windows, open `acalc-engine.exe`. On Linux, open a terminal in that folder
-   and run `chmod +x acalc-engine engines/engine-iso-0.1.0-linux-x86_64/engine-iso-0.1.0`,
+   and run `chmod +x acalc-engine engines/engine-iso-0.1.4-linux-x86_64/engine-iso-0.1.4`,
    then `./acalc-engine`.
    Keep the console open while using Acalc; press **Ctrl+C** to stop it.
    Startup discovers engines in the extracted subfolders automatically. Launching
@@ -174,9 +174,10 @@ The metadata version selects `releases/<version>/acalc-qgis-<version>.zip`.
 That directory also receives `SHA256SUMS`, `BUILD-INFO.json` (exact packaged file
 hashes, their combined tree hash, source location and packaging tools), and an
 installation README. Commit the complete version directory and the automatically
-refreshed [releases/README.md](releases/README.md), which lists all release versions
-with the newest first and direct download links.
-Older version directories remain untouched; no root or `dist/` download copy is
+refreshed [releases/README.md](releases/README.md), which lists the release with
+its direct download link. `releases/` keeps only the latest version: delete the
+superseded version directory in the same commit, and rerun the command so the index
+matches. Earlier versions remain in Git history. No root or `dist/` download copy is
 created. Keep the native `acalc/` installation folder and fixed archive metadata.
 When adding runtime file types or subdirectories, update the script’s explicit
 file selection.
@@ -185,8 +186,8 @@ An identical rerun validates the existing files and leaves them unchanged.
 Different input for an existing version is rejected. Normally bump the metadata
 version to add a release; to intentionally correct that version during review,
 use `python3 scripts/package_plugin.py --replace`. This explicit operation only
-replaces that version’s four known files and never deletes other versions.
-Versions must be raw package versions such as `0.8.3`, without a `v` prefix or
+replaces that version’s four known files; the script never deletes other versions.
+Versions must be raw package versions such as `0.8.4`, without a `v` prefix or
 path components. Provenance works without Git history: `inputs_sha256` maps
 archive paths to file SHA-256 hashes. `source.tree_sha256` hashes that map encoded
 as UTF-8 JSON with sorted keys and separators `(',', ':')`

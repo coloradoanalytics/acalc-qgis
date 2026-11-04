@@ -53,10 +53,10 @@ Python/GDAL; no extra Python packages are required.
 | --- | --- | --- |
 """ + "\n".join(rows) + """
 
-Each `releases/<version>/` directory contains its versioned artifact,
-`SHA256SUMS`, `BUILD-INFO.json` and installation README. Packaging refreshes this
-index, listing the newest version first and retaining earlier version directories.
-There are no duplicate `latest` or root download files.
+The `releases/<version>/` directory contains the versioned artifact,
+`SHA256SUMS`, `BUILD-INFO.json` and installation README. Only the latest version
+is kept here; earlier versions remain in Git history. There are no duplicate
+`latest` or root download files.
 
 The installer contains the native `acalc/` plugin folder. Repository source ZIPs
 are for development and are not QGIS plugin installers. Model editing works

@@ -17,7 +17,7 @@ experimental=True
 deprecated=False
 hasProcessingProvider=False
 changelog=
-    0.8.4 Native GeoPackage files are called models; bridge to portable multi-model projects; engine identity fix when several compatible engines are available.
+    0.8.4 Native GeoPackage files are called models; bridge to portable multi-model projects; engine identity fix when several compatible engines are available; CadnaA/GIS export moved to the Model page.
     0.8.3 Reorganized Project page and expanded log window; preserve calculation component counts after completion.
     0.8.2 Remove the unencrypted connection warning for LAN use.
     0.8.1 Simplified engine connections, draft tests and installed engine versions; QGIS 3.34 raster compatibility.

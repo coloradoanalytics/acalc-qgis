@@ -7,12 +7,11 @@ Python/GDAL; no extra Python packages are required.
 | Version | Plugin installer | Verification and installation |
 | --- | --- | --- |
 | **0.8.4 (current)** | [acalc-qgis-0.8.4.zip](https://github.com/coloradoanalytics/acalc-qgis/raw/refs/heads/main/releases/0.8.4/acalc-qgis-0.8.4.zip) | [Install notes](0.8.4/README.md) · [SHA256SUMS](0.8.4/SHA256SUMS) · [BUILD-INFO.json](0.8.4/BUILD-INFO.json) |
-| 0.8.3 | [acalc-qgis-0.8.3.zip](https://github.com/coloradoanalytics/acalc-qgis/raw/refs/heads/main/releases/0.8.3/acalc-qgis-0.8.3.zip) | [Install notes](0.8.3/README.md) · [SHA256SUMS](0.8.3/SHA256SUMS) · [BUILD-INFO.json](0.8.3/BUILD-INFO.json) |
 
-Each `releases/<version>/` directory contains its versioned artifact,
-`SHA256SUMS`, `BUILD-INFO.json` and installation README. Packaging refreshes this
-index, listing the newest version first and retaining earlier version directories.
-There are no duplicate `latest` or root download files.
+The `releases/<version>/` directory contains the versioned artifact,
+`SHA256SUMS`, `BUILD-INFO.json` and installation README. Only the latest version
+is kept here; earlier versions remain in Git history. There are no duplicate
+`latest` or root download files.
 
 The installer contains the native `acalc/` plugin folder. Repository source ZIPs
 are for development and are not QGIS plugin installers. Model editing works
