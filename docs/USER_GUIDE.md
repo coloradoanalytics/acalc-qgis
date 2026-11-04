@@ -757,7 +757,7 @@ An empty new model contains one empty **Default** variant and no model layers.
 
 ## Export to CadnaA
 
-Use **Calculation → Export…** to choose a variant and export either a CadnaA
+On the **Model** page, use **Export to CadnaA / GIS…** to choose a variant and export either a CadnaA
 2021 QSI package or authored GIS shapefiles. QSI includes compatible acoustic
 attributes and spectra; raw GIS layers need setup in CadnaA. Export writes a new
 folder with import instructions and a settings/identity report. See

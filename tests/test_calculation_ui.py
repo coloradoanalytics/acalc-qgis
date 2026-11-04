@@ -86,20 +86,23 @@ class CalculationUITests(ModelFixture):
         self.assertIn("Remote service", dialog.engine.currentText())
         self.assertEqual(set(dialog.panels), {self.engine_id, selected})
 
-    def test_calculation_page_has_export_without_api_controls(self):
+    def test_model_page_has_export_and_calculation_page_does_not(self):
         from acalc.export_dialog import ExportDialog
-        page = self.plugin.dock.calculation_page
+        dock = self.plugin.dock
+        page = dock.calculation_page
         self.assertTrue(page.engine.isHidden())
         self.assertFalse(hasattr(page, "api_settings_button"))
-        self.assertTrue(page.export_button.isEnabled())
+        self.assertFalse(hasattr(page, "export_button"))
+        self.assertTrue(dock.export_model_button.isEnabled())
         with patch.object(ExportDialog, "exec_", return_value=0) as opened:
-            page.export_button.click()
+            dock.export_model_button.click()
         opened.assert_called_once()
-        page.set_calculating(True)
-        self.assertFalse(page.export_button.isEnabled())
-        page.set_calculating(False)
+        dock.set_calculating(True)
+        self.assertFalse(dock.export_model_button.isEnabled())
+        dock.set_calculating(False)
+        self.assertTrue(dock.export_model_button.isEnabled())
         self.plugin.close_project()
-        self.assertFalse(page.export_button.isEnabled())
+        self.assertFalse(dock.export_model_button.isEnabled())
 
     def test_long_error_does_not_expand_dock_and_can_be_copied_in_full(self):
         dock = self.plugin.dock

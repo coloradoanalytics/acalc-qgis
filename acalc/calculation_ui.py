@@ -48,9 +48,7 @@ class CalculationPage(QWidget):
         self.back_calculate_button = QPushButton("Back-calculate source power…")
         self.back_calculate_button.clicked.connect(lambda: controller.run(controller.open_back_calculation_dialog))
         self.back_calculate_button.setToolTip("Fit adjustable sound power spectra to octave Measurements using a compatible engine.")
-        self.export_button = QPushButton("Export…")
-        self.export_button.clicked.connect(lambda: controller.run(self.open_export))
-        for widget in (self.check_button, self.calculate_button, self.back_calculate_button, self.export_button):
+        for widget in (self.check_button, self.calculate_button, self.back_calculate_button):
             actions.addWidget(widget)
         outer.addLayout(actions)
         self.splitter = QSplitter(Qt.Vertical)
@@ -102,11 +100,6 @@ class CalculationPage(QWidget):
     def settings(self):
         return self.controller.store.calculation()["settings"] if self.controller.store else default_settings()
 
-    def open_export(self):
-        from .export_dialog import ExportDialog
-        self.controller.require_store()
-        ExportDialog(self.controller, self).exec_()
-
     def dirty(self):
         return False
 
@@ -153,7 +146,6 @@ class CalculationPage(QWidget):
         self.back_calculate_button.setEnabled(active and any(
             "source_receiver_transfers" in engine.capabilities.get("features", [])
             for engine in available_engines()))
-        self.export_button.setEnabled(active)
 
 
 class ResultsPage(QWidget):

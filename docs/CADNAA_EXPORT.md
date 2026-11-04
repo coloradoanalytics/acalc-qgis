@@ -1,6 +1,6 @@
 # CadnaA 2021 model export
 
-On Calculation, choose **Export…**, select a variant and format, and choose a
+On the Model page, choose **Export to CadnaA / GIS…**, select a variant and format, and choose a
 new export folder. Export does not require a calculation API connection. It
 uses saved model data; open layer edits must first be saved through the existing
 edit-buffer protection. Existing export folders are never overwritten. A failed
